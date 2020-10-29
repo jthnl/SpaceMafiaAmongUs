@@ -1,0 +1,24 @@
+{
+  "name": "spacemafiaamongus",
+  "version": "1.0.0",
+  "description": "SENG513 - NodeJS ",
+  "main": "./app.js",
+  "scripts": {
+    "start": "node ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jthnl/SpaceMafiaAmongUs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jthnl/SpaceMafiaAmongUs/issues"
+  },
+  "homepage": "https://github.com/jthnl/SpaceMafiaAmongUs#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
