@@ -4,64 +4,58 @@
  * Starting point for the server.  
  */
 
- 'use strict';
+'use strict';
 
-let express = require('express');
-let session = require('express-session');
-const { allowedNodeEnvironmentFlags } = require('process');
+const express = require('express');
+const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
-let app = express();
-
-let http = require('http').Server(app);
-//let io = require('socket.io')(http);
-
-let port = 3000;
+const port = process.env.PORT_NODE;
 
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-/**
- * Note: Change session options before actually deploying to the public. 
- * https://martinfowler.com/articles/session-secret.html
- */
-app.use(session({
-    secret: "temp-secret-string",   
-    resave: true,
-    saveUninitialized: true,
-    cookie: { secure: false },  //remove domain
-    key: 'spacemafia.sid',
-}));
+const db = require('./server/database/mongoconn');
+const routes = require('./server/config/routes');
+const cookiesetup = require('./server/config/cookiesetup');
+const passportsetup = require('./server/config/passportsetup');
 
-// Test Express Session
-app.get('/test', (req, res, next) => {
-    console.log("router");
-    console.log(req.session);
-    console.log(req.session.key++);
-    res.send('helloSession');
+const passport = require('passport');
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+db(async (client) => {
+    const dbm = await client.db(process.env.DB_NAME).collection(process.env.DB_USER);
+
+    cookiesetup(app, io, dbm, passport);
+    passportsetup(app, dbm, passport);
+    routes(app, dbm);
+
+    io.on('connection', (socket) => {
+
+        // when client connects, greet hello!
+        socket.emit("helloClient", "Hello Client!"); // TODO: change "Hello Client!" to a JSON datastructure for more complex tasks 
+
+        // when socket recieves "helloServer" from client, capitalize message and send it back to client
+        socket.on('helloServer', (data) =>{
+            console.log("user says: " + data);
+            data = data.toUpperCase();
+            socket.emit('helloClient', "You said: " + data);
+        });
+
+        // when socket recieves "helloServer" from client, capitalize message and send it back to client
+        socket.on('bye', (data) =>{
+            console.log("user says: " + data);
+            // TODO: remove user from active clients
+        });
+
+    });
+}).catch((e) => {
+    console.log("Unable to connect to db. F");
 });
-
-
-// // socket io
-// io.on('connection', (socket) => {
-
-//     // when client connects, greet hello!
-//     socket.emit("helloClient", "Hello Client!"); // TODO: change "Hello Client!" to a JSON datastructure for more complex tasks 
-
-//     // when socket recieves "helloServer" from client, capitalize message and send it back to client
-//     socket.on('helloServer', (data) =>{
-//         console.log("user says: " + data);
-//         data = data.toUpperCase();
-//         socket.emit('helloClient', "You said: " + data);
-//     });
-
-//     // when socket recieves "helloServer" from client, capitalize message and send it back to client
-//     socket.on('bye', (data) =>{
-//         console.log("user says: " + data);
-//         // TODO: remove user from active clients
-//     });
-
-// });
 
 // wait for clients on port
 http.listen(port, () => {
