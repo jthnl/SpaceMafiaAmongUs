@@ -1,7 +1,8 @@
 /**
- * Connection to MongoDB Database
+ * mongoconn.js
  * 
- * Allows for async callbacks to the database
+ * Connection to MongoDB Database. Allows for async
+ * callbacks to the database
  */
 
 const { MongoClient } = require('mongodb');

@@ -1,5 +1,12 @@
+/**
+ * routes.js
+ * 
+ * Routes for managing HTTP requests and other routing.
+ * 
+ * TODO: Hash and encrypt user password before inserting
+ */
+
 const passport = require('passport');
-const express = require('express');
 
 module.exports = function (app, db) {
 
@@ -14,7 +21,6 @@ module.exports = function (app, db) {
 
     app.route('/register').post(
         (req, res, next) => {
-            // const hash = bcrypt.hashSync(req.body.password, 12);
             db.findOne({ username: req.body.username }, function (err, user) {
                 if (err) {
                     next(err);
