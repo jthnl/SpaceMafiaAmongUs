@@ -10,14 +10,21 @@ const passport = require('passport');
 
 module.exports = function (app, db) {
 
-    app.route('/').get((req, res) => {
-        res.redirect('/login');
-    });
-
-    app.route('/login/auth').post(passport.authenticate('local', { failureRedirect: '/lol' }), (req, res) => {
-        console.log("authenticated");
-        res.redirect('/working');
-    });
+    app.post('/login',
+        passport.authenticate('local', { failWithError: true }),
+        function (req, res, next) {
+            res.json({
+                "username": req.body.username,
+                "success": true
+            });
+        },
+        function (err, req, res, next) {
+            res.json({
+                "username": req.body.username,
+                "success": false
+            });
+        }
+    );
 
     app.route('/register').post(
         (req, res, next) => {
@@ -25,12 +32,18 @@ module.exports = function (app, db) {
                 if (err) {
                     next(err);
                 } else if (user) {
-                    res.redirect('/');
+                    res.json({
+                        "username": req.body.username,
+                        "success": false
+                    });
                 } else {
                     db.insertOne({ username: req.body.username, password: req.body.password }, (err, doc) => {
                         if (err) {
                             console.log(console.error());
-                            res.redirect('/');
+                            res.json({
+                                "username": req.body.username,
+                                "success": false
+                            });
                         } else {
                             console.log(doc.ops[0]);
                             next(null, doc.ops[0]);
@@ -39,15 +52,20 @@ module.exports = function (app, db) {
                 }
             });
         },
-        passport.authenticate('local', { failureRedirect: '/' }),
-        (req, res, next) => {
-            res.redirect('/game');
+        passport.authenticate('local', { failWithError: true }),
+        function (req, res, next) {
+            res.json({
+                "username": req.body.username,
+                "success": true
+            });
+        },
+        function (err, req, res, next) {
+            res.json({
+                "username": req.body.username,
+                "success": false
+            });
         }
     );
 
 };
 
-
-function registerUser(req, res, next){
-
-}
