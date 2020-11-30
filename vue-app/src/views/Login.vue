@@ -1,18 +1,11 @@
 <template>
   <div class="login">
     <h1>Login</h1>
-    <p>
-      <input v-model="username" placeholder="username" />
-    </p>
-    <p>
-      <input v-model="password" placeholder="password" />
-    </p>
-    <p>
-      <button v-on:click="sendLogin()">Login</button>
-    </p>
-    <p>
-      <router-link to="/register" tag="button">Sign Up</router-link>
-    </p>
+    <p><input v-model="username" placeholder="username" /></p>
+    <p><input v-model="password" placeholder="password" /></p>
+    <p><button v-on:click="sendLogin()">Login</button></p>
+    <p><router-link to="/register" tag="button">Sign Up</router-link></p>
+    <p>{{errMessage}}</p>
   </div>
 </template>
 
@@ -26,6 +19,7 @@ export default {
     return {
       username: "",
       password: "",
+      errMessage: "",
     };
   },
   methods: {
@@ -43,10 +37,11 @@ export default {
         })
         .then((res) => {
           console.log(res);
-          router.push("/home");
+          router.push("/lobby");
         })
         .catch((err) => {
           console.log(err.response);
+          this.errMessage = err.response.data.message;
         });
     },
   },
