@@ -21,6 +21,18 @@ const routes = require('./server/config/routes');                   // HTTP rout
 const cookiesetup = require('./server/config/cookiesetup');         // setup cookies for Passport and SocketIO
 const passportsetup = require('./server/config/passportsetup');     // setup Passport
 
+// ========= CORS for testing purposes ====================================================
+let crossDomain = function(req, res, next){
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+}
+let cors = require('cors');
+app.options('*', cors());
+app.use(crossDomain);
+
 // set express middlewear
 app.use(express.static("public"));
 app.use(express.json());
