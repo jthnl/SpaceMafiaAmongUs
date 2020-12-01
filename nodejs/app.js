@@ -21,17 +21,6 @@ const routes = require('./server/config/httpsetup');                   // HTTP r
 const cookiesetup = require('./server/config/cookiesetup');         // setup cookies for Passport and SocketIO
 const passportsetup = require('./server/config/passportsetup');     // setup Passport
 const route = require('./server/routes/route');
-// ========= CORS for testing purposes ====================================================
-let crossDomain = function(req, res, next){
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
-}
-let cors = require('cors');
-app.options('*', cors());
-app.use(crossDomain);
 
 // set express middlewear
 app.use(express.static("public"));
@@ -53,7 +42,7 @@ db(async (client) => {
     // wait for socket io connection. 
     // NOTE: Connection will be refused if client is not authenticated (see ./server/config/cookiesetup)
     io.on('connection', (socket) => {
-        
+
         // SOCKET IO TESTS - TODO: CHANGE THIS --
         // when client connects, greet hello!
         socket.emit("helloClient", "Hello Client!"); // TODO: change "Hello Client!" to a JSON datastructure for more complex tasks 
