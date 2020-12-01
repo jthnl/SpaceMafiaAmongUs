@@ -1,17 +1,15 @@
 <template>
-  <span>World</span>
+  <span>Insert Chat Component Here</span>
 </template>
 
 <script>
 module.exports = {
   mounted() {
-    console.log("Hello World");
+    console.log("Chat component added");
   },
 };
 </script>
 
 <style scoped>
-span {
-  background-color: yellow;
-}
+
 </style>

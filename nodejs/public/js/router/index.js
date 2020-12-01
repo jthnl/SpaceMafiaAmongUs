@@ -3,6 +3,7 @@ import httpVueLoader from '/web_modules/http-vue-loader/src/httpVueLoader.js'
 var Login = httpVueLoader('js/views/Login.vue');
 var Lobby = httpVueLoader('js/views/Lobby.vue');
 var Register = httpVueLoader('js/views/Register.vue');
+var Room = httpVueLoader('js/views/Room.vue');
 
 var routes = [
   {
@@ -19,6 +20,11 @@ var routes = [
     path: '/register',
     name: 'register',
     component: Register
+  },
+  {
+    path: '/room',
+    name: 'room',
+    component: Room
   }
 ];
 

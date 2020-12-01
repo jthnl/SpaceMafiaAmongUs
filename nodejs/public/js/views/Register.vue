@@ -12,9 +12,6 @@
 </template>
 
 <script>
-// import router from "../router";
-// import axios from "axios";
-
 module.exports = {
   name: "Register",
   mounted() {
@@ -49,7 +46,7 @@ module.exports = {
           console.log(res);
           if(res.data.success){
             // if success, go to lobby
-            router.push("/lobby");
+            this.$router.push("/lobby")
           }else{
             // if fail, notify user
             this.errMessage = res.data.message;

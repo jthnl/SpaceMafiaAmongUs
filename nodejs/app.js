@@ -21,6 +21,7 @@ const routes = require('./server/config/httpsetup');                   // HTTP r
 const cookiesetup = require('./server/config/cookiesetup');         // setup cookies for Passport and SocketIO
 const passportsetup = require('./server/config/passportsetup');     // setup Passport
 const route = require('./server/routes/route');
+const socketlogic = require('./server/routes/socketlogic');
 
 // set express middlewear
 app.use(express.static("public"));
@@ -42,24 +43,9 @@ db(async (client) => {
     // wait for socket io connection. 
     // NOTE: Connection will be refused if client is not authenticated (see ./server/config/cookiesetup)
     io.on('connection', (socket) => {
-
-        // SOCKET IO TESTS - TODO: CHANGE THIS --
-        // when client connects, greet hello!
-        socket.emit("helloClient", "Hello Client!"); // TODO: change "Hello Client!" to a JSON datastructure for more complex tasks 
-
-        // when socket recieves "helloServer" from client, capitalize message and send it back to client
-        socket.on('helloServer', (data) =>{
-            console.log("user says: " + data);
-            data = data.toUpperCase();
-            socket.emit('helloClient', "You said: " + data);
-        });
-
-        // when socket recieves "helloServer" from client, capitalize message and send it back to client
-        socket.on('bye', (data) =>{
-            console.log("user says: " + data);
-            // TODO: remove user from active clients
-        });
-        // -- END OF SOCKET IO TESTS
+        
+        // manage socketIO logic, see ./server/routes/socketlogic
+        socketlogic(io, socket);
 
     });
 }).catch((e) => {

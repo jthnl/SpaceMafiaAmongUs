@@ -13,7 +13,7 @@
       <div class="grid-left">
         <div class="account-info">
           <h2>Account</h2>
-          <p>Account Name</p>
+          <p>{{me.username}} : {{me.name}}</p>
         </div>
 
         <div class="account-info">
@@ -24,7 +24,9 @@
         </div>
 
         <div>
-          <p><input class="input" v-model="gameCode" placeholder="Enter Code" /></p>
+          <p>
+            <input class="input" v-model="gameCode" placeholder="Enter Code" />
+          </p>
           <p><button v-on:click="joinGame()">Join Game</button></p>
           <p><button v-on:click="createGame()">Create Game</button></p>
         </div>
@@ -41,27 +43,30 @@
 module.exports = {
   name: "login",
   mounted() {
-    console.log("Login Page loaded");
-    let axios = document.createElement('script');
-    axios.setAttribute('src', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js');
-    document.head.appendChild(axios);
-    
+    console.log("Lobby Page loaded");
+    console.log("opening socket");
     this.$socket.open();
-    // let router = document.createElement('script');
-    // router.setAttribute('src', 'js/router/index.js');
-    // document.head.appendChild(router);
+    this.$socket.emit("whoAmI");
   },
   data: function () {
     return {
+      me: [],
       gameCode: "",
     };
   },
+  created: function () {
+    // add socket listeners
+    this.sockets.subscribe("whoAmI", (data) => {
+       this.me = data;
+    });
+  },
   methods: {
     joinGame: function () {
-        console.log("joinGame not implemented yet");
+      console.log("joinGame not implemented yet");
     },
     createGame: function () {
-        console.log("createGame not implemented yet");
+      console.log("createGame not implemented yet");
+      this.$router.push("/room")
     },
   },
 };
