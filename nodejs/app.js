@@ -17,10 +17,10 @@ const port = process.env.PORT_NODE;
 
 // local modules
 const db = require('./server/database/mongoconn');                  // connection to mongo
-const routes = require('./server/config/routes');                   // HTTP routes
+const routes = require('./server/config/httpsetup');                   // HTTP routes
 const cookiesetup = require('./server/config/cookiesetup');         // setup cookies for Passport and SocketIO
 const passportsetup = require('./server/config/passportsetup');     // setup Passport
-
+const route = require('./server/routes/route');
 // ========= CORS for testing purposes ====================================================
 let crossDomain = function(req, res, next){
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
@@ -49,11 +49,11 @@ db(async (client) => {
     cookiesetup(app, io, dbm, passport);         // setup Cookies for Passport and SocketIO
     passportsetup(app, dbm, passport);           // setup Passport
     routes(app, dbm);                            // HTTP routes
-
+    route(app, dbm);
     // wait for socket io connection. 
     // NOTE: Connection will be refused if client is not authenticated (see ./server/config/cookiesetup)
     io.on('connection', (socket) => {
-
+        
         // SOCKET IO TESTS - TODO: CHANGE THIS --
         // when client connects, greet hello!
         socket.emit("helloClient", "Hello Client!"); // TODO: change "Hello Client!" to a JSON datastructure for more complex tasks 

@@ -5,16 +5,19 @@
     <p><input v-model="password" placeholder="password" /></p>
     <p><button v-on:click="sendLogin()">Login</button></p>
     <p><router-link to="/register" tag="button">Sign Up</router-link></p>
-    <p>{{errMessage}}</p>
+    <!-- <p>{{ errMessage }}</p> -->
   </div>
 </template>
 
 <script>
-import router from "../router";
-import axios from "axios";
-
-export default {
-  name: "Login",
+module.exports = {
+  name: "login",
+  mounted() {
+    console.log("Login Page loaded");
+    let axios = document.createElement('script');
+    axios.setAttribute('src', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js');
+    document.head.appendChild(axios);
+  },
   data: function () {
     return {
       username: "",
@@ -37,7 +40,7 @@ export default {
         })
         .then((res) => {
           console.log(res);
-          router.push("/lobby");
+          this.$router.push("/lobby")
         })
         .catch((err) => {
           console.log(err.response);
@@ -47,3 +50,15 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+span {
+  background-color: yellow;
+}
+</style>
+
+
+
+
+
+

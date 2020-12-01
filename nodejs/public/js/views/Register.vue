@@ -12,11 +12,17 @@
 </template>
 
 <script>
-import router from "../router";
-import axios from "axios";
+// import router from "../router";
+// import axios from "axios";
 
-export default {
+module.exports = {
   name: "Register",
+  mounted() {
+    console.log("Register Page loaded");
+    let axios = document.createElement('script');
+    axios.setAttribute('src', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js');
+    document.head.appendChild(axios);
+  },
   data: function () {
     return {
       name: "",

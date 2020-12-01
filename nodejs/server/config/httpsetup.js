@@ -1,7 +1,7 @@
 /**
- * routes.js
+ * httpsetup.js
  * 
- * Routes for managing HTTP requests and other routing.
+ * Routes for managing HTTP requests.
  * 
  * TODO: Hash and encrypt user password before inserting
  */
