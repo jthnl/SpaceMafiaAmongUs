@@ -1,35 +1,40 @@
 import httpVueLoader from '/web_modules/http-vue-loader/src/httpVueLoader.js'
 
 var Login = httpVueLoader('js/views/Login.vue');
-var Lobby = httpVueLoader('js/views/Lobby.vue');
 var Register = httpVueLoader('js/views/Register.vue');
+var Account = httpVueLoader('js/views/Account.vue');
+var Lobby = httpVueLoader('js/views/Lobby.vue');
 var Room = httpVueLoader('js/views/Room.vue');
 
-var routes = [
-  {
-    path: '/',
-    name: 'login',
-    component: Login
-  },
-  {
-    path: '/lobby',
-    name: 'lobby',
-    component: Lobby
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: Register
-  },
-  {
-    path: '/room',
-    name: 'room',
-    component: Room
-  }
+var routes = [{
+        path: '/',
+        name: 'login',
+        component: Login
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: Register
+    },
+    {
+        path: '/account',
+        name: 'account',
+        component: Account
+    },
+    {
+        path: '/lobby',
+        name: 'lobby',
+        component: Lobby
+    },
+    {
+        path: '/room',
+        name: 'room',
+        component: Room
+    }
 ];
 
 var router = new VueRouter({
-  routes: routes
+    routes: routes
 });
 
 export default router

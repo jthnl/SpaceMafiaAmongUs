@@ -11,9 +11,9 @@ Vue.use(
     new VueSocketIO({
         debug: true,
         connection: SocketIO("http://localhost:3000", {
-            autoConnect : false
+            autoConnect: false
         }),
-        
+
     })
 );
 

@@ -1,11 +1,13 @@
 <template>
-  <div class="login">
-    <h1>Login</h1>
-    <p><input v-model="username" placeholder="username" /></p>
-    <p><input v-model="password" placeholder="password" /></p>
-    <p><button v-on:click="sendLogin()">Login</button></p>
-    <p><router-link to="/register" tag="button">Sign Up</router-link></p>
-    <!-- <p>{{ errMessage }}</p> -->
+  <div class="div-main div-centered login">
+    <div class="div-h-centered">
+      <h1>Log In</h1>
+      <p><input v-model="username" placeholder="Username" /></p>
+      <p><input v-model="password" placeholder="Password" /></p>
+      <p><button v-on:click="sendLogin()">Log In</button></p>
+      <p><router-link to="/register" tag="button">Sign Up</router-link></p>
+      <!-- <p>{{ errMessage }}</p> -->
+    </div>
   </div>
 </template>
 
@@ -14,8 +16,11 @@ module.exports = {
   name: "login",
   mounted() {
     console.log("Login Page loaded");
-    let axios = document.createElement('script');
-    axios.setAttribute('src', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js');
+    let axios = document.createElement("script");
+    axios.setAttribute(
+      "src",
+      "https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+    );
     document.head.appendChild(axios);
   },
   data: function () {
@@ -36,11 +41,11 @@ module.exports = {
 
       axios
         .post("http://localhost:3000/login", loginInfo, {
-          headers: {withCredentials: true},
+          headers: { withCredentials: true },
         })
         .then((res) => {
           console.log(res);
-          this.$router.push("/lobby")
+          this.$router.push("/account");
         })
         .catch((err) => {
           console.log(err.response);
@@ -51,14 +56,4 @@ module.exports = {
 };
 </script>
 
-<style scoped>
-span {
-  background-color: yellow;
-}
-</style>
-
-
-
-
-
-
+<style></style>
