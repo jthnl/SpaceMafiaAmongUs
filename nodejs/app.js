@@ -17,11 +17,10 @@ const port = process.env.PORT_NODE;
 
 // local modules
 const db = require('./server/database/mongoconn');                  // connection to mongo
-const routes = require('./server/config/httpsetup');                   // HTTP routes
+const routes = require('./server/config/httpsetup');                // HTTP routes
 const cookiesetup = require('./server/config/cookiesetup');         // setup cookies for Passport and SocketIO
 const passportsetup = require('./server/config/passportsetup');     // setup Passport
-const route = require('./server/routes/route');
-const socketlogic = require('./server/routes/socketlogic');
+const socketlogic = require('./server/routes/socketlogic');         // SocketIO Setup
 
 // set express middlewear
 app.use(express.static("public"));
@@ -39,15 +38,11 @@ db(async (client) => {
     cookiesetup(app, io, dbm, passport);         // setup Cookies for Passport and SocketIO
     passportsetup(app, dbm, passport);           // setup Passport
     routes(app, dbm);                            // HTTP routes
-    route(app, dbm);
-    // wait for socket io connection. 
-    // NOTE: Connection will be refused if client is not authenticated (see ./server/config/cookiesetup)
-    io.on('connection', (socket) => {
-        
-        // manage socketIO logic, see ./server/routes/socketlogic
-        socketlogic(io, socket);
 
+    io.on('connection', (socket) => {            // SocketIO Setup. Needs authentication
+        socketlogic(io, socket);
     });
+    
 }).catch((e) => {
     console.log("Unable to connect to db. F");
 });

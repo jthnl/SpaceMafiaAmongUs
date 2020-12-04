@@ -11,6 +11,13 @@ const passport = require('passport');
 module.exports = function (app, db) {
 
     /**
+     * Redirect to home page
+     */
+    app.route('/').get((req, res) =>{
+        res.redirect('/');
+    });
+
+    /**
      * HTTP POST: /login
      * Expects JSON Object: { username : "<username>", password : "<password>" }
      * Returns JSON Object: { username : "<username>", success : true/false, message: "<message>" }
