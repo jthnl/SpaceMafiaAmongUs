@@ -1,21 +1,18 @@
 <template>
-    <div class="room">
-        <chat-component></chat-component>
-    </div>
+  <div class="room">
+    <chat-component></chat-component>
+  </div>
 </template>
 
 <script>
-var chatComponent = httpVueLoader('/js/components/AppWorld.vue');
+var chatComponent = httpVueLoader("/js/components/AppWorld.vue");
 module.exports = {
-    name: 'room',
-    mounted() {
-    },
-    components:{
-        'chat-component': chatComponent
-    }
-}
+  name: "room",
+  mounted() {},
+  components: {
+    "chat-component": chatComponent,
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style></style>
