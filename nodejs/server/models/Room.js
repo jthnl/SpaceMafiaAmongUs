@@ -1,13 +1,18 @@
 const ChatSession = require('../models/ChatSession');
 const Game = require('../models/Game');
+const Player = require('../models/Player');
 
 module.exports = class Room {
     constructor() {
         this.roomCode = Room.generateRoomCode();
         this.chatSession = new ChatSession();
         this.game = new Game();
+        this.playerList = [];
     }
 
+    addPlayer(user){
+        this.playerList.push(new Player(user.id, user.username));
+    }
 
     static generateRoomCode() {
         let roomCode = '';

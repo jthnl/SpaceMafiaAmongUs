@@ -28,22 +28,24 @@ module.exports = function (io, socket) {
     // ACCOUNT PAGE - create game
     socket.on('createGame', () => {
         console.log("createGame");
-        let newRoom = new Room();
-        socket.join(newRoom.roomCode);      // Join Socket IO Room
-        roomCollection.push(newRoom);       // Push room to DB (temporary array)
-        socket.emit('roomSetup', newRoom);
+        let newRoom = new Room();                       // Create new Room
+        newRoom.addPlayer(socket.request.user);         // Add self to Player list in Room
+        socket.join(newRoom.roomCode);                  // Join Socket IO Room
+        roomCollection.push(newRoom);                   // Push room to DB (temporary array)
+        socket.emit('roomCode', newRoom.roomCode);      // Send room to user
     });
 
     // ACCOUNT PAGE - join game
-    socket.on('joinGame', (code) => {  
-        console.log("joinGame" + code);
-        let room = roomCollection.find( ({roomCode}) => roomCode === code);
+    socket.on('joinGame', (code) => {
+        console.log("joinGame:" + code);
+        let room = roomCollection.find(({ roomCode }) => roomCode === code);
         console.log(room);
-        if(room){
+        if (room) {
+            room.addPlayer(socket.request.user);
             socket.join(room.roomCode);
-            socket.emit('roomSetup', room);
-            // notify that player joined
-            // io.to.room(room.roomCode).emit();
+            socket.emit('roomCode', room.roomCode);
+            io.to(room.roomCode).emit('roomUpdate', room);
+            io.to(room.roomCode).emit('playerListUpdate', room.playerList);
         } else {
             // TODO: Error handling
         }
@@ -51,8 +53,32 @@ module.exports = function (io, socket) {
 
     // ===== ROOM PAGE ====================================================== //
 
+    socket.on('roomSetup', (code) => {
+        console.log("roomSetup");
+        let room = roomCollection.find(({ roomCode }) => roomCode === code);
+        console.log(room);
+        if (room) {
+            //room.addPlayer(socket.request.user);
+            //socket.join(room.roomCode);
+            socket.emit('roomUpdate', room);
+            socket.emit('playerListUpdate', room.playerList);
+            //io.to(room.roomCode).emit("roomUpdate", room);     // TODO: decompose Room to components for efficiency
+        } else {
+            // TODO: Error handling
+        }
+    });
 
-    
+    socket.on('roomPlayerList', (gameCode)=>{
+        console.log("roomPlayerList CALLED");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        
+        console.log("roomPlayerList CALLED2:" + room);
+        socket.emit('playerListUpdate', room.playerList);
+        // let room = roomCollection.find(({ roomCode }) => roomCode === socket.room);
+        // socket.emit('playerListUpdate', room.playerList);
+    })
+
+
 
 
 

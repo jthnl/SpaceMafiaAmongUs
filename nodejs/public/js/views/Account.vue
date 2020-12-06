@@ -40,8 +40,8 @@
 module.exports = {
   name: "login",
   mounted() {
-    console.log("Account Page loaded");
-    console.log("opening socket");
+    console.log("Account.vue Loaded");
+    // Setup Sockets
     this.$socket.open();
     this.$socket.emit("whoAmI");
   },
@@ -52,23 +52,26 @@ module.exports = {
     };
   },
   created: function () {
-    // add socket listeners
+    // SOCKET IO LISTENERS
     this.sockets.subscribe("accountUserInfo", (data) => {
       this.me = data;
     });
+
+    this.sockets.subscribe("roomCode", (data) => {
+      this.gameCode = data;
+      localStorage.setItem("gameCode", this.gameCode);
+      this.$router.push({ name: "room" });
+      this.gameCode = "";
+    });
   },
   methods: {
+    // SOCKET IO EMITTERS
     joinGame: function () {
       this.$socket.emit("joinGame", this.gameCode);
       this.gameCode = "";
-      this.$router.push("/room");
     },
     createGame: function () {
       this.$socket.emit("createGame");
-      this.$router.push("/room");
     },
   },
 };
-</script>
-
-<style></style>

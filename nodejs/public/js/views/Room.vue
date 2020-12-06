@@ -5,12 +5,9 @@
         <h1><router-link to="/">Space Mafia Among Us</router-link></h1>
       </div>
       <div class="grid-item-page div-centered">
-        <h2>Room: {{this.room.roomCode}}</h2>
+        <h2>Room: {{ this.gameCode }}</h2>
       </div>
-      <div class="grid-item-users">
-        <h2>Users</h2>
-        <ul id="users"></ul>
-      </div>
+      <userlist-component></userlist-component>
       <div class="grid-item-messages">
         <h2>Messages</h2>
         <ul id="messages"></ul>
@@ -28,24 +25,33 @@
 </template>
 
 <script>
-var chatComponent = httpVueLoader("/js/components/ChatComponent.vue");
 module.exports = {
   name: "room",
-  mounted() {},
+  mounted() {
+    console.log("room");
+    if (localStorage.getItem("gameCode") === null) {
+       this.$router.push({ name: "account" });
+    }
+    this.gameCode = localStorage.getItem("gameCode");
+    this.$socket.emit("roomSetup", this.gameCode);
+  },
   components: {
-    "chat-component": chatComponent,
+    "chat-component": httpVueLoader("/js/components/ChatComponent.vue"),
+    "userlist-component": httpVueLoader("/js/components/UserlistComponent.vue"),
   },
   data: function () {
     return {
       me: [],
-      room: [],
+      gameCode: [],
+      roomObj: [],
     };
   },
   created: function () {
-    // add socket listeners
-    this.sockets.subscribe("roomSetup", (data) => {
-      this.room = data;
-      console.log(JSON.stringify(this.room));
+    this.sockets.subscribe("roomUpdate", (data) => {
+      this.roomObj = data;
+      console.log(
+        "roomObj initialized:" + JSON.stringify(this.roomObj.playerList)
+      );
     });
   },
 };
