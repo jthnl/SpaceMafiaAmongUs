@@ -8,10 +8,14 @@
 // console.log = function() {}
 
 const NUMBER_OF_QUESTS = 5;
+const NUMBER_OF_QUESTS_NEEDED_TO_WIN = 3;
 const NUMBER_OF_FAILS_REQUIRED_FOR_FAIL = 1;
 
 const INNOCENT_ROLE = "INNOCENT";
 const TRAITOR_ROLE = "TRAITOR";
+
+const SUCCESS_RESULT = "SUCCESS";
+const FAIL_RESULT = "FAIL";
 
 // Allow only 2 numbers of players: 5 or 6
 const MIN_NUMBER_OF_PLAYERS = 5;
@@ -21,23 +25,35 @@ const MAX_NUMBER_OF_PLAYERS = 6;
 const NUMBER_OF_PLAYERS_FOR_5 = 5;
 const NUMBER_OF_INNOCENT_PLAYERS_FOR_5 = 3;
 const NUMBER_OF_TRAITOR_PLAYERS_FOR_5 = 2;
-const QUEST_1_SIZE_FOR_5 = 2;
-const QUEST_2_SIZE_FOR_5 = 3;
-const QUEST_3_SIZE_FOR_5 = 2;
-const QUEST_4_SIZE_FOR_5 = 3;
-const QUEST_5_SIZE_FOR_5 = 3;
-const QUEST_SIZES_FOR_5 = [QUEST_1_SIZE_FOR_5, QUEST_2_SIZE_FOR_5, QUEST_3_SIZE_FOR_5, QUEST_4_SIZE_FOR_5, QUEST_5_SIZE_FOR_5];
+const QUEST_1_TEAM_SIZE_FOR_5 = 2;
+const QUEST_2_TEAM_SIZE_FOR_5 = 3;
+const QUEST_3_TEAM_SIZE_FOR_5 = 2;
+const QUEST_4_TEAM_SIZE_FOR_5 = 3;
+const QUEST_5_TEAM_SIZE_FOR_5 = 3;
+const QUEST_TEAM_SIZES_FOR_5 = [
+    QUEST_1_TEAM_SIZE_FOR_5,
+    QUEST_2_TEAM_SIZE_FOR_5,
+    QUEST_3_TEAM_SIZE_FOR_5,
+    QUEST_4_TEAM_SIZE_FOR_5,
+    QUEST_5_TEAM_SIZE_FOR_5
+];
 
 // Game setup for 6 players
 const NUMBER_OF_PLAYERS_FOR_6 = 6;
 const NUMBER_OF_INNOCENT_PLAYERS_FOR_6 = 4;
 const NUMBER_OF_TRAITOR_PLAYERS_FOR_6 = 2;
-const QUEST_1_SIZE_FOR_6 = 2;
-const QUEST_2_SIZE_FOR_6 = 3;
-const QUEST_3_SIZE_FOR_6 = 4;
-const QUEST_4_SIZE_FOR_6 = 3;
-const QUEST_5_SIZE_FOR_6 = 4;
-const QUEST_SIZES_FOR_6 = [QUEST_1_SIZE_FOR_6, QUEST_2_SIZE_FOR_6, QUEST_3_SIZE_FOR_6, QUEST_4_SIZE_FOR_6, QUEST_5_SIZE_FOR_6];
+const QUEST_1_TEAM_SIZE_FOR_6 = 2;
+const QUEST_2_TEAM_SIZE_FOR_6 = 3;
+const QUEST_3_TEAM_SIZE_FOR_6 = 4;
+const QUEST_4_TEAM_SIZE_FOR_6 = 3;
+const QUEST_5_TEAM_SIZE_FOR_6 = 4;
+const QUEST_TEAM_SIZES_FOR_6 = [
+    QUEST_1_TEAM_SIZE_FOR_6,
+    QUEST_2_TEAM_SIZE_FOR_6,
+    QUEST_3_TEAM_SIZE_FOR_6,
+    QUEST_4_TEAM_SIZE_FOR_6,
+    QUEST_5_TEAM_SIZE_FOR_6
+];
 
 /**
  * A player of Space Mafia Among Us.
@@ -47,54 +63,64 @@ class Player {
         this.id = id;
         this.role = null;
         this.is_captain = false;
-        this.on_quest = false;
-        this.quest_voting_enabled = false;
-    }
-
-    get_player_status() {
-
+        this.on_team = false;
+        this.team_voting_enabled = false; // Vote to approve/refuse a team
+        this.quest_voting_enabled = false; // Vote to succeed/fail a quest
     }
 }
 
-// Quest
+// A quest in Space Mafia Among Us.
 class Quest {
-    constructor(number_of_players){
-        this.number_of_players = number_of_players;
-        this.fail_votes = 0;
-        this.success_votes = 0;
-        this.selected_players = [];
+    constructor(number_of_quest_players) {
+        this.number_of_quest_players = number_of_quest_players;
+        this.number_of_quest_succeses = 0;
+        this.number_of_quest_fails = 0;
+        this.quest_result = null;
+        this.quest_players = [];
     }
 
-    add_player(player){
-        this.selected_players.push(player);
+    get_quest_players() {
+        return this.quest_players;
     }
 
+    add_player_to_quest(player) {
+        if (this.quest_players.length >= this.number_of_quest_players) {
+            throw 'Maximum number of quest players reached!';
+        }
 
-    get_selected_players(){
-        return this.selected_players;
+        this.quest_players.push(player);
     }
 
+    enable_quest_voting() {
+        for (let i = 0; i < this.quest_players.length; i++) {
+            this.quest_players[i].quest_voting_enabled = true;
+        }
+    }
 
-    vote_on_quest(vote) {
-        if (this.fail_votes + this.success_votes > this.number_of_players) {
+    vote_for_quest(player, vote) {
+        if (this.number_of_quest_succeses + this.number_of_quest_fails > this.number_of_quest_players) {
             throw 'Maximum number of quest votes reached!';
         }
 
-        if (vote == true) {
-            this.success_votes++;
-        } else {
-            this.fail_votes++;
+        if (player.quest_voting_enabled == false) {
+            throw 'Player has already voted for quest or is not part of the quest!';
         }
+
+        if (vote == true) {
+            this.number_of_quest_succeses++;
+        } else {
+            this.number_of_quest_fails++;
+        }
+
+        // Disable quest voting
+        player.quest_voting_enabled = false;
     }
 
-    reset(){
-        this.fail_votes = 0;
-        this.success_votes = 0;
-        this.selected_players = [];
+    reset() {
+        this.number_of_quest_succeses = 0;
+        this.number_of_quest_fails = 0;
+        this.quest_players = [];
     }
-
-
-
 }
 
 /**
@@ -121,37 +147,46 @@ class Game {
             case NUMBER_OF_PLAYERS_FOR_5:
                 this.number_of_innocent_players = NUMBER_OF_INNOCENT_PLAYERS_FOR_5;
                 this.number_of_traitor_players = NUMBER_OF_TRAITOR_PLAYERS_FOR_5;
-                this.quest_sizes = QUEST_SIZES_FOR_5;
+                this.quest_team_sizes = QUEST_TEAM_SIZES_FOR_5;
                 break;
             case NUMBER_OF_PLAYERS_FOR_6:
                 this.number_of_innocent_players = NUMBER_OF_INNOCENT_PLAYERS_FOR_6;
                 this.number_of_traitor_players = NUMBER_OF_TRAITOR_PLAYERS_FOR_6;
-                this.quest_sizes = QUEST_SIZES_FOR_6;
+                this.quest_team_sizes = QUEST_TEAM_SIZES_FOR_6;
                 break;
             default:
                 throw 'Invalid number of players!';
         }
+
+        this.game_complete = false;
         this.captain_index = -1;
-        this.quest_size_index = 0;
+        this.quest_team_size_index = 0;
         this.quest_in_progress = false;
-        this.number_of_quest_players = 0;
-        this.number_of_quest_approval = 0;
-        this.number_of_quest_refusal = 0;
+
+        // Team-related variables
+        this.number_of_team_players = 0;
+        this.number_of_team_approval = 0;
+        this.number_of_team_refusal = 0;
+
+        // Quest-related variables
+        this.innocent_wins = 0;
+        this.traitor_wins = 0;
+        this.current_quest = null;
+
+        // List variables
         this.players = [];
         this.quests = [];
-        this.quest_fails = 0;
-        this.quest_successes = 0;
-        this.current_quest = null;
+
+        this.create_quests();
     }
 
     create_quests() {
-        for (let i = 0; i < 5; i++) {
-            this.quests.push(new Quest(this.quest_sizes[i]));
+        for (let i = 0; i < this.quest_team_sizes.length; i++) {
+            this.quests.push(new Quest(this.quest_team_sizes[i]));
         }
+
         this.current_quest = this.quests[0];
     }
-
-
 
     add_player(player) {
         if (this.players.length >= this.number_of_players) {
@@ -195,61 +230,60 @@ class Game {
         this.players[this.captain_index].is_captain = true;
     }
 
-    add_player_to_quest(player) {
-        if (this.number_of_quest_players >= this.quest_sizes[this.quest_size_index]) {
-            throw 'Maximum number of quest players reached!';
+    add_player_to_team(player) {
+        if (this.number_of_team_players >= this.quest_team_sizes[this.quest_team_size_index]) {
+            throw 'Maximum number of team players reached!';
         }
 
-        this.players.find(p => p === player).on_quest = true;
-        this.quests[this.quest_size_index].add_player(player.id); 
-        this.number_of_quest_players++;
+        this.players.find(p => p === player).on_team = true;
+        this.number_of_team_players++;
+        this.quests[this.quest_team_size_index].add_player_to_quest(player);
     }
 
-    enable_quest_voting() {
+    enable_team_voting() {
         for (let i = 0; i < this.players.length; i++) {
-            this.players[i].quest_voting_enabled = true;
+            this.players[i].team_voting_enabled = true;
         }
     }
 
-    vote_for_quest(player, vote) {
-        if (this.number_of_quest_approval + this.number_of_quest_refusal > this.number_of_players) {
-            throw 'Maximum number of quest votes reached!';
+    vote_for_team(player, vote) {
+        if (this.number_of_team_approval + this.number_of_team_refusal > this.number_of_players) {
+            throw 'Maximum number of team votes reached!';
         }
 
-        if (player.quest_voting_enabled == false) {
-            throw 'Player has already voted!';
+        if (player.team_voting_enabled == false) {
+            throw 'Player has already voted for team!';
         }
 
         if (vote == true) {
-            this.number_of_quest_approval++;
+            this.number_of_team_approval++;
         } else {
-            this.number_of_quest_refusal++;
+            this.number_of_team_refusal++;
         }
 
-        // Disable quest voting
-        player.quest_voting_enabled = false;
+        // Disable team voting
+        player.team_voting_enabled = false;
     }
 
     try_to_start_quest() {
-        // If quest is approved by a majority of players, start quest
-        if (this.number_of_quest_approval > this.number_of_quest_refusal) {
-            this.quest_size_index++; // Move on to the next quest size (i.e., for next round)
+        // If team is approved by a majority of players, start quest
+        if (this.number_of_team_approval > this.number_of_team_refusal) {
+            this.quest_team_size_index++; // Move on to the next quest team size (i.e., for next round)
             this.quest_in_progress = true;
         }
-        // If quest is refused by a majority of players, remove everyone on_quest
+        // If team is refused by a majority of players, remove everyone on_team
         else {
             for (let i = 0; i < this.players.length; i++) {
-                this.players[i].on_quest = false;
+                this.players[i].on_team = false;
             }
+
             this.current_quest.reset();
         }
 
-       
-
-        // Reset all quest-related variables
-        this.number_of_quest_players = 0;
-        this.number_of_quest_approval = 0;
-        this.number_of_quest_refusal = 0;
+        // Reset all team-related variables
+        this.number_of_team_players = 0;
+        this.number_of_team_approval = 0;
+        this.number_of_team_refusal = 0;
 
         this.players[this.captain_index].is_captain = false;
 
@@ -260,26 +294,29 @@ class Game {
         this.players[this.captain_index].is_captain = true;
     }
 
-    resolve_quest(){
-        if(this.current_quest.fail_votes > 0){
-            this.quest_fails++;
-        }
-        else{
-            this.quest_successes++;
+    resolve_quest() {
+        // If we reach the required number of fails to fail, increment traitor wins
+        if (this.current_quest.number_of_quest_fails >= NUMBER_OF_FAILS_REQUIRED_FOR_FAIL) {
+            this.traitor_wins++;
+            this.current_quest.quest_result = FAIL_RESULT;
+        } else {
+            this.innocent_wins++;
+            this.current_quest.quest_result = SUCCESS_RESULT;
         }
 
-        this.current_quest = this.quests[this.quest_size_index]; // go to next quest
+        this.current_quest = this.quests[this.quest_team_size_index]; // Move on to next quest
         this.quest_in_progress = false;
-    
-
     }
 
-    check_win(){
-    
-    }
+    check_win() {
+        if (this.traitor_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN ||
+            this.innocent_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN) {
+            this.game_complete = true;
 
-    get_game_status() {
+            console.log("Check win: game complete");
+        }
 
+        console.log("Check win: no winner yet");
     }
 
     print_game_status(message) {
@@ -295,7 +332,7 @@ class Game {
 let game = new Game();
 
 // Initialize with 6 players
-game.init(6);
+game.init(NUMBER_OF_PLAYERS_FOR_6);
 
 // Create players
 let player_paru = new Player(0);
@@ -314,8 +351,6 @@ game.add_player(player_vince);
 game.add_player(player_rainer);
 game.add_player(player_evan);
 game.add_player(player_jath);
-game.create_quests();
-
 
 game.print_game_status("Add players to game");
 
@@ -324,76 +359,82 @@ game.assign_roles();
 
 game.print_game_status("Assign roles");
 
+// Enter team building phase
+
+// Add players to team (refused team example)
+game.add_player_to_team(player_paru);
+game.add_player_to_team(player_juan);
+
+game.print_game_status("Add players to team (refused team example)");
+
+// Enable team voting (refused team example)
+game.enable_team_voting();
+
+game.print_game_status("Enable team voting (refused team example)");
+
+// Vote for team (refused team example)
+game.vote_for_team(player_paru, true);
+game.vote_for_team(player_juan, true);
+game.vote_for_team(player_vince, true);
+game.vote_for_team(player_rainer, false);
+game.vote_for_team(player_evan, false);
+game.vote_for_team(player_jath, false);
+
+game.print_game_status("Vote for team (refused team example)");
+
+// Try to start quest 1 (refused team example)
+game.try_to_start_quest();
+
+game.print_game_status("Try to start quest 1 (refused team example)");
+
+// Add players to team (approved team example)
+game.add_player_to_team(player_vince);
+game.add_player_to_team(player_rainer);
+
+game.print_game_status("Add players to team (approved team example)");
+
+// Enable team voting (approved team example)
+game.enable_team_voting();
+
+game.print_game_status("Enable team voting (approved team example)");
+
+// Vote for team (approved team example)
+game.vote_for_team(player_paru, true);
+game.vote_for_team(player_juan, true);
+game.vote_for_team(player_vince, true);
+game.vote_for_team(player_rainer, true);
+game.vote_for_team(player_evan, false);
+game.vote_for_team(player_jath, false);
+
+game.print_game_status("Vote for team (approved team example)");
+
+// Try to start quest 1 (approved team example)
+game.try_to_start_quest();
+
+game.print_game_status("Try to start quest 1 (approved team example)");
+
 // Enter quest phase
 
-// Add players to quest 1 (refused quest)
-game.add_player_to_quest(player_paru);
-game.add_player_to_quest(player_juan);
+if (game.quest_in_progress) {
 
-game.print_game_status("Add players to quest 1 (refused quest)");
+    // Enable quest voting (failed quest example)
+    game.current_quest.enable_quest_voting();
 
-// Enable quest voting for quest 1 (refused quest)
-game.enable_quest_voting();
+    game.print_game_status("Enable quest voting (failed quest example)");
 
-game.print_game_status("Enable quest voting for quest 1 (refused quest)");
+    // Vote for quest (failed quest example)
+    game.current_quest.vote_for_quest(player_vince, true);
+    game.current_quest.vote_for_quest(player_rainer, false);
 
-// Vote for quest 1 (refused quest)
-game.vote_for_quest(player_paru, true);
-game.vote_for_quest(player_juan, true);
-game.vote_for_quest(player_vince, true);
-game.vote_for_quest(player_rainer, false);
-game.vote_for_quest(player_evan, false);
-game.vote_for_quest(player_jath, false);
+    game.print_game_status("Vote for quest (failed quest example)");
 
-game.print_game_status("Vote for quest 1 (refused quest)");
-
-// Try to start quest 1 (refused quest)
-game.try_to_start_quest();
-
-game.print_game_status("Try to start quest 1 (refused quest)");
-
-// Add players to quest 1 (approved quest)
-game.add_player_to_quest(player_vince);
-game.add_player_to_quest(player_rainer);
-
-game.print_game_status("Add players to quest 1 (approved quest)");
-
-// Enable quest voting for quest 1 (approved quest)
-game.enable_quest_voting();
-
-game.print_game_status("Enable quest voting for quest 1 (approved quest)");
-
-// Vote for quest 1 (approved quest)
-game.vote_for_quest(player_paru, true);
-game.vote_for_quest(player_juan, true);
-game.vote_for_quest(player_vince, true);
-game.vote_for_quest(player_rainer, true);
-game.vote_for_quest(player_evan, false);
-game.vote_for_quest(player_jath, false);
-
-game.print_game_status("Vote for quest 1 (approved quest)");
-
-// Try to start quest 1 (approved quest)
-game.try_to_start_quest();
-
-
-game.print_game_status("Try to start quest 1 (approved quest)");
-
-if(game.quest_in_progress){
-    let selected_players = game.current_quest.get_selected_players(); // make it so only these players can vote somehow idk
-    console.log(selected_players);
-    game.current_quest.vote_on_quest(true);
-    game.current_quest.vote_on_quest(false);  // quest fails
+    // Resolve quest (failed quest example)
     game.resolve_quest();
+
+    game.print_game_status("Resolve quest (failed quest example)");
 }
 
-
-
-
-
-game.print_game_status("Quest 1 completed");
-
-// Enter quest phase
+game.check_win();
 
 // /* TO-DO:
 // * Voting System
