@@ -26,6 +26,7 @@ const QUEST_2_SIZE_FOR_5 = 3;
 const QUEST_3_SIZE_FOR_5 = 2;
 const QUEST_4_SIZE_FOR_5 = 3;
 const QUEST_5_SIZE_FOR_5 = 3;
+const QUEST_SIZES_FOR_5 = [QUEST_1_SIZE_FOR_5, QUEST_2_SIZE_FOR_5, QUEST_3_SIZE_FOR_5, QUEST_4_SIZE_FOR_5, QUEST_5_SIZE_FOR_5];
 
 // Game setup for 6 players
 const NUMBER_OF_PLAYERS_FOR_6 = 6;
@@ -36,6 +37,7 @@ const QUEST_2_SIZE_FOR_6 = 3;
 const QUEST_3_SIZE_FOR_6 = 4;
 const QUEST_4_SIZE_FOR_6 = 3;
 const QUEST_5_SIZE_FOR_6 = 4;
+const QUEST_SIZES_FOR_6 = [QUEST_1_SIZE_FOR_6, QUEST_2_SIZE_FOR_6, QUEST_3_SIZE_FOR_6, QUEST_4_SIZE_FOR_6, QUEST_5_SIZE_FOR_6];
 
 /**
  * A player of Space Mafia Among Us.
@@ -77,16 +79,23 @@ class Game {
             case NUMBER_OF_PLAYERS_FOR_5:
                 this.number_of_innocent_players = NUMBER_OF_INNOCENT_PLAYERS_FOR_5;
                 this.number_of_traitor_players = NUMBER_OF_TRAITOR_PLAYERS_FOR_5;
+                this.quest_sizes = QUEST_SIZES_FOR_5;
                 break;
             case NUMBER_OF_PLAYERS_FOR_6:
                 this.number_of_innocent_players = NUMBER_OF_INNOCENT_PLAYERS_FOR_6;
                 this.number_of_traitor_players = NUMBER_OF_TRAITOR_PLAYERS_FOR_6;
+                this.quest_sizes = QUEST_SIZES_FOR_6;
                 break;
             default:
                 throw 'Invalid number of players!';
         }
 
         this.captain_index = -1;
+        this.quest_size_index = 0;
+        this.quest_in_progress = false;
+        this.number_of_quest_players = 0;
+        this.number_of_quest_approval = 0;
+        this.number_of_quest_refusal = 0;
         this.players = [];
     }
 
@@ -129,6 +138,54 @@ class Game {
 
         // Choose a random captain
         this.captain_index = Math.floor(Math.random() * this.number_of_players);
+        this.players[this.captain_index].is_captain = true;
+    }
+
+    add_player_to_quest(player) {
+        if (this.number_of_quest_players >= this.quest_sizes[this.quest_size_index]) {
+            throw 'Maximum number of quest players reached!';
+        }
+
+        this.players.find(p => p === player).on_quest = true;
+        this.number_of_quest_players++;
+    }
+
+    vote_for_quest(vote) {
+        if (this.number_of_quest_approval + this.number_of_quest_refusal > this.number_of_players) {
+            throw 'Maximum number of quest votes reached!';
+        }
+
+        if (vote == true) {
+            this.number_of_quest_approval++;
+        } else {
+            this.number_of_quest_refusal++;
+        }
+    }
+
+    try_to_start_quest() {
+        // If quest is approved by a majority of players, start quest
+        if (this.number_of_quest_approval > this.number_of_quest_refusal) {
+            this.quest_size_index++; // Move on to the next quest size (i.e., for next round)
+            this.quest_in_progress = true;
+        }
+        // If quest is refused by a majority of players, remove everyone on_quest
+        else {
+            for (let i = 0; i < this.players.length; i++) {
+                this.players[i].on_quest = false;
+            }
+        }
+
+        // Reset all quest-related variables
+        this.number_of_quest_players = 0;
+        this.number_of_quest_approval = 0;
+        this.number_of_quest_refusal = 0;
+
+        this.players[this.captain_index].is_captain = false;
+
+        // Increment captain index, but loop back to the beginning of the array if we reach the end
+        let new_captain_index = this.captain_index + 1;
+        this.captain_index = new_captain_index < this.number_of_players ? new_captain_index : 0;
+
         this.players[this.captain_index].is_captain = true;
     }
 
@@ -176,7 +233,49 @@ game.assign_roles();
 
 game.print_game_status("Assign roles");
 
-// Enter team building phase
+// Enter quest phase
+
+// Add players to quest 1 (refused quest)
+game.add_player_to_quest(player_paru);
+game.add_player_to_quest(player_juan);
+
+game.print_game_status("Add players to quest 1 (refused quest)");
+
+// Vote for quest 1 (refused quest)
+game.vote_for_quest(true);
+game.vote_for_quest(true);
+game.vote_for_quest(true);
+game.vote_for_quest(false);
+game.vote_for_quest(false);
+game.vote_for_quest(false);
+
+game.print_game_status("Vote for quest 1 (refused quest)");
+
+// Try to start quest 1 (refused quest)
+game.try_to_start_quest();
+
+game.print_game_status("Try to start quest 1 (refused quest)");
+
+// Add players to quest 1 (approved quest)
+game.add_player_to_quest(player_vince);
+game.add_player_to_quest(player_rainer);
+
+game.print_game_status("Add players to quest 1 (approved quest)");
+
+// Vote for quest 1 (approved quest)
+game.vote_for_quest(true);
+game.vote_for_quest(true);
+game.vote_for_quest(true);
+game.vote_for_quest(true);
+game.vote_for_quest(false);
+game.vote_for_quest(false);
+
+game.print_game_status("Vote for quest 1 (approved quest)");
+
+// Try to start quest 1 (approved quest)
+game.try_to_start_quest();
+
+game.print_game_status("Try to start quest 1 (approved quest)");
 
 // Enter quest phase
 
