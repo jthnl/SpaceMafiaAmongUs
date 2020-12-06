@@ -53,16 +53,18 @@ module.exports = {
   },
   created: function () {
     // add socket listeners
-    this.sockets.subscribe("whoAmI", (data) => {
+    this.sockets.subscribe("accountUserInfo", (data) => {
       this.me = data;
     });
   },
   methods: {
     joinGame: function () {
-      console.log("joinGame not implemented yet");
+      this.$socket.emit("joinGame", this.gameCode);
+      this.gameCode = "";
+      this.$router.push("/room");
     },
     createGame: function () {
-      console.log("createGame not implemented yet");
+      this.$socket.emit("createGame");
       this.$router.push("/room");
     },
   },
