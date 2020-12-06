@@ -31,16 +31,17 @@ module.exports = function (io, socket) {
         let newRoom = new Room();
         socket.join(newRoom.roomCode);      // Join Socket IO Room
         roomCollection.push(newRoom);       // Push room to DB (temporary array)
-        socket.emit('accountCreateGame', newRoom);
+        socket.emit('roomSetup', newRoom);
     });
 
     // ACCOUNT PAGE - join game
     socket.on('joinGame', (code) => {  
         console.log("joinGame" + code);
         let room = roomCollection.find( ({roomCode}) => roomCode === code);
+        console.log(room);
         if(room){
             socket.join(room.roomCode);
-            socket.emit('accountJoinGame', room);
+            socket.emit('roomSetup', room);
             // notify that player joined
             // io.to.room(room.roomCode).emit();
         } else {
