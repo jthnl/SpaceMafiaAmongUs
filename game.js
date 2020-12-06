@@ -43,11 +43,12 @@ const QUEST_SIZES_FOR_6 = [QUEST_1_SIZE_FOR_6, QUEST_2_SIZE_FOR_6, QUEST_3_SIZE_
  * A player of Space Mafia Among Us.
  */
 class Player {
-    constructor(name) {
-        this.name = name;
+    constructor(id) {
+        this.id = id;
         this.role = null;
         this.is_captain = false;
         this.on_quest = false;
+        this.quest_voting_enabled = false;
     }
 
     get_player_status() {
@@ -150,9 +151,19 @@ class Game {
         this.number_of_quest_players++;
     }
 
-    vote_for_quest(vote) {
+    enable_quest_voting() {
+        for (let i = 0; i < this.players.length; i++) {
+            this.players[i].quest_voting_enabled = true;
+        }
+    }
+
+    vote_for_quest(player, vote) {
         if (this.number_of_quest_approval + this.number_of_quest_refusal > this.number_of_players) {
             throw 'Maximum number of quest votes reached!';
+        }
+
+        if (player.quest_voting_enabled == false) {
+            throw 'Player has already voted!';
         }
 
         if (vote == true) {
@@ -160,6 +171,9 @@ class Game {
         } else {
             this.number_of_quest_refusal++;
         }
+
+        // Disable quest voting
+        player.quest_voting_enabled = false;
     }
 
     try_to_start_quest() {
@@ -209,12 +223,12 @@ let game = new Game();
 game.init(6);
 
 // Create players
-let player_paru = new Player('Paru');
-let player_juan = new Player('Juan');
-let player_vince = new Player('Vince');
-let player_rainer = new Player('Rainer');
-let player_evan = new Player('Evan');
-let player_jath = new Player('Jath');
+let player_paru = new Player(0);
+let player_juan = new Player(1);
+let player_vince = new Player(2);
+let player_rainer = new Player(3);
+let player_evan = new Player(4);
+let player_jath = new Player(5);
 
 game.print_game_status("Create players");
 
@@ -241,13 +255,18 @@ game.add_player_to_quest(player_juan);
 
 game.print_game_status("Add players to quest 1 (refused quest)");
 
+// Enable quest voting for quest 1 (refused quest)
+game.enable_quest_voting();
+
+game.print_game_status("Enable quest voting for quest 1 (refused quest)");
+
 // Vote for quest 1 (refused quest)
-game.vote_for_quest(true);
-game.vote_for_quest(true);
-game.vote_for_quest(true);
-game.vote_for_quest(false);
-game.vote_for_quest(false);
-game.vote_for_quest(false);
+game.vote_for_quest(player_paru, true);
+game.vote_for_quest(player_juan, true);
+game.vote_for_quest(player_vince, true);
+game.vote_for_quest(player_rainer, false);
+game.vote_for_quest(player_evan, false);
+game.vote_for_quest(player_jath, false);
 
 game.print_game_status("Vote for quest 1 (refused quest)");
 
@@ -262,13 +281,18 @@ game.add_player_to_quest(player_rainer);
 
 game.print_game_status("Add players to quest 1 (approved quest)");
 
+// Enable quest voting for quest 1 (approved quest)
+game.enable_quest_voting();
+
+game.print_game_status("Enable quest voting for quest 1 (approved quest)");
+
 // Vote for quest 1 (approved quest)
-game.vote_for_quest(true);
-game.vote_for_quest(true);
-game.vote_for_quest(true);
-game.vote_for_quest(true);
-game.vote_for_quest(false);
-game.vote_for_quest(false);
+game.vote_for_quest(player_paru, true);
+game.vote_for_quest(player_juan, true);
+game.vote_for_quest(player_vince, true);
+game.vote_for_quest(player_rainer, true);
+game.vote_for_quest(player_evan, false);
+game.vote_for_quest(player_jath, false);
 
 game.print_game_status("Vote for quest 1 (approved quest)");
 
