@@ -56,6 +56,47 @@ class Player {
     }
 }
 
+// Quest
+class Quest {
+    constructor(number_of_players){
+        this.number_of_players = number_of_players;
+        this.fail_votes = 0;
+        this.success_votes = 0;
+        this.selected_players = [];
+    }
+
+    add_player(player){
+        this.selected_players.push(player);
+    }
+
+
+    get_selected_players(){
+        return this.selected_players;
+    }
+
+
+    vote_on_quest(vote) {
+        if (this.fail_votes + this.success_votes > this.number_of_players) {
+            throw 'Maximum number of quest votes reached!';
+        }
+
+        if (vote == true) {
+            this.success_votes++;
+        } else {
+            this.fail_votes++;
+        }
+    }
+
+    reset(){
+        this.fail_votes = 0;
+        this.success_votes = 0;
+        this.selected_players = [];
+    }
+
+
+
+}
+
 /**
  * A game of Space Mafia Among Us.
  */
@@ -90,7 +131,6 @@ class Game {
             default:
                 throw 'Invalid number of players!';
         }
-
         this.captain_index = -1;
         this.quest_size_index = 0;
         this.quest_in_progress = false;
@@ -98,7 +138,20 @@ class Game {
         this.number_of_quest_approval = 0;
         this.number_of_quest_refusal = 0;
         this.players = [];
+        this.quests = [];
+        this.quest_fails = 0;
+        this.quest_successes = 0;
+        this.current_quest = null;
     }
+
+    create_quests() {
+        for (let i = 0; i < 5; i++) {
+            this.quests.push(new Quest(this.quest_sizes[i]));
+        }
+        this.current_quest = this.quests[0];
+    }
+
+
 
     add_player(player) {
         if (this.players.length >= this.number_of_players) {
@@ -148,6 +201,7 @@ class Game {
         }
 
         this.players.find(p => p === player).on_quest = true;
+        this.quests[this.quest_size_index].add_player(player.id); 
         this.number_of_quest_players++;
     }
 
@@ -187,7 +241,10 @@ class Game {
             for (let i = 0; i < this.players.length; i++) {
                 this.players[i].on_quest = false;
             }
+            this.current_quest.reset();
         }
+
+       
 
         // Reset all quest-related variables
         this.number_of_quest_players = 0;
@@ -201,6 +258,24 @@ class Game {
         this.captain_index = new_captain_index < this.number_of_players ? new_captain_index : 0;
 
         this.players[this.captain_index].is_captain = true;
+    }
+
+    resolve_quest(){
+        if(this.current_quest.fail_votes > 0){
+            this.quest_fails++;
+        }
+        else{
+            this.quest_successes++;
+        }
+
+        this.current_quest = this.quests[this.quest_size_index]; // go to next quest
+        this.quest_in_progress = false;
+    
+
+    }
+
+    check_win(){
+    
     }
 
     get_game_status() {
@@ -239,6 +314,8 @@ game.add_player(player_vince);
 game.add_player(player_rainer);
 game.add_player(player_evan);
 game.add_player(player_jath);
+game.create_quests();
+
 
 game.print_game_status("Add players to game");
 
@@ -299,7 +376,22 @@ game.print_game_status("Vote for quest 1 (approved quest)");
 // Try to start quest 1 (approved quest)
 game.try_to_start_quest();
 
+
 game.print_game_status("Try to start quest 1 (approved quest)");
+
+if(game.quest_in_progress){
+    let selected_players = game.current_quest.get_selected_players(); // make it so only these players can vote somehow idk
+    console.log(selected_players);
+    game.current_quest.vote_on_quest(true);
+    game.current_quest.vote_on_quest(false);  // quest fails
+    game.resolve_quest();
+}
+
+
+
+
+
+game.print_game_status("Quest 1 completed");
 
 // Enter quest phase
 
