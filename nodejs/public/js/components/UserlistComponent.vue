@@ -32,7 +32,8 @@ module.exports = {
   methods: {
     // SOCKET IO EMITTERS
     ready: function () {
-      console.log("ready() - NOT IMPLEMENTED YET");
+      console.log("Not implemented yet");
+    },
   },
 };
 </script>
