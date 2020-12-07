@@ -11,8 +11,14 @@ module.exports = class Room {
     }
 
     addPlayer(user){
-        this.playerList.push(new Player(user.id, user.username));
+        this.playerList.push(new Player(user._id, user.username));
     }
+
+    removePlayer(user){
+        this.playerList.filter(_id => _id === user._id);
+        console.log("RemovePlayer():" + JSON.stringify(this.playerList));
+    }
+
 
     static generateRoomCode() {
         let roomCode = '';

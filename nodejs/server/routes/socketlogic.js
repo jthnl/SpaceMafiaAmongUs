@@ -61,7 +61,7 @@ module.exports = function (io, socket) {
             //room.addPlayer(socket.request.user);
             //socket.join(room.roomCode);
             socket.emit('roomUpdate', room);
-            socket.emit('playerListUpdate', room.playerList);
+            io.to(room.roomCode).emit('playerListUpdate', room.playerList);
             //io.to(room.roomCode).emit("roomUpdate", room);     // TODO: decompose Room to components for efficiency
         } else {
             // TODO: Error handling
