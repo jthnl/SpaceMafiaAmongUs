@@ -39,7 +39,6 @@ module.exports = function (io, socket) {
     socket.on('joinGame', (code) => {
         console.log("joinGame:" + code);
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
-        console.log(room);
         if (room) {
             room.addPlayer(socket.request.user);
             socket.join(room.roomCode);
@@ -52,11 +51,9 @@ module.exports = function (io, socket) {
     });
 
     // ===== ROOM PAGE ====================================================== //
-
     socket.on('roomSetup', (code) => {
         console.log("roomSetup");
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
-        console.log(room);
         if (room) {
             //room.addPlayer(socket.request.user);
             //socket.join(room.roomCode);
@@ -69,15 +66,45 @@ module.exports = function (io, socket) {
     });
 
     socket.on('roomPlayerList', (gameCode)=>{
-        console.log("roomPlayerList CALLED");
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
-        
-        console.log("roomPlayerList CALLED2:" + room);
         socket.emit('playerListUpdate', room.playerList);
         // let room = roomCollection.find(({ roomCode }) => roomCode === socket.room);
         // socket.emit('playerListUpdate', room.playerList);
     })
 
+
+    // ===== CHAT COMPONENT ================================================= //
+    socket.on('newMessage', (code, data) => {
+        console.log("newMessage");
+        let room = roomCollection.find(({ roomCode }) => roomCode === code);
+        if(room){
+            room.chatSession.newMessage(socket.request.user._id, data);
+            io.to(room.roomCode).emit('updateMessage', {
+                messageList: room.chatSession.messageList, 
+                playerList: room.playerList
+            });
+            socket.emit('updateMessage', {
+                messageList: room.chatSession.messageList, 
+                playerList: room.playerList
+            });
+        }else {
+            // TODO: Error Handling
+        }
+    });
+
+    
+    socket.on('roomMessageList', (code) => {
+        console.log("roomMessageList");
+        let room = roomCollection.find(({ roomCode }) => roomCode === code);
+        if(room){
+            socket.emit('updateMessage', {
+                messageList: room.chatSession.messageList, 
+                playerList: room.playerList
+            });
+        }else {
+            // TODO: Error Handling
+        }
+    });
 
 
 

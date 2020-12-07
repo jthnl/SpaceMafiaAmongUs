@@ -38,7 +38,7 @@
 
 <script>
 module.exports = {
-  name: "login",
+  name: "account",
   mounted() {
     console.log("Account.vue Loaded");
     // Setup Sockets

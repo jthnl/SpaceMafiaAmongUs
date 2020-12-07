@@ -6,13 +6,17 @@
         {{ player.username }}
       </li>
     </ul>
+    <p><button v-on:click="ready()">Ready</button></p>
   </div>
 </template>
 
 <script>
 module.exports = {
+  name: "userlistcomponent",
   mounted() {
+    //this.$socket.open();
     console.log("Userlist component added");
+    this.$socket.emit("roomPlayerList", localStorage.getItem("gameCode"));
   },
   data: function () {
     return {
@@ -20,17 +24,15 @@ module.exports = {
     };
   },
   created: function () {
-    console.log("ULISTREFRESH:A");
-
     //    SOCKET IO LISTENERS
     this.sockets.subscribe("playerListUpdate", (data) => {
       this.playerList = data;
-      console.log(
-        "playerListUpdate initialized:" + JSON.stringify(this.playerList)
-      );
     });
-
-    this.$socket.emit("roomPlayerList", localStorage.getItem("gameCode"));
+  },
+  methods: {
+    // SOCKET IO EMITTERS
+    ready: function () {
+      console.log("ready() - NOT IMPLEMENTED YET");
   },
 };
 </script>
