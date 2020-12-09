@@ -18,9 +18,9 @@
       </div>
       <div class="account-info">
         <h2>Stats</h2>
-        <p>Games Played:</p>
-        <p>Wins:</p>
-        <p>Losses:</p>
+        <p>Games Played: {{ myStats.gamesplayed }}</p>
+        <p>Wins:  {{ myStats.wins }}</p>
+        <p>Losses:  {{ myStats.losses }}</p>
       </div>
       <div>
         <p>
@@ -48,6 +48,7 @@ module.exports = {
   data: function () {
     return {
       me: [],
+      myStats: [],
       gameCode: "",
     };
   },
@@ -55,6 +56,10 @@ module.exports = {
     // SOCKET IO LISTENERS
     this.sockets.subscribe("accountUserInfo", (data) => {
       this.me = data;
+    });
+
+    this.sockets.subscribe("accountUserStats", (data) => {
+      this.myStats = data;
     });
 
     this.sockets.subscribe("roomCode", (data) => {

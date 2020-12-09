@@ -6,102 +6,132 @@
  */
 
 const Room = require('../models/Room');
+const GameManager = require('../gameboard/GameManager');
+
+const GAME_STATE_PENDING = 0;
+const GAME_STATE_TEAMBUILD = 1;
+const GAME_STATE_TEAMVOTE = 2;
+const GAME_STATE_QUEST = 3;
+const GAME_STATE_END = 4;
 
 let roomCollection = [];    // TODO: Save to database
 
 module.exports = function (io, socket) {
 
-    // ===== ACCOUNT PAGE =================================================== //
-
-    // ACCOUNT PAGE - whoami
+    // whoAmI - returns to the user their account information and statistics 
     socket.on('whoAmI', () => {
         data = {
+            "_id": socket.request.user._id,
             "username": socket.request.user.username,
             "email": socket.request.user.email,
             "name": socket.request.user.name
         }
+        stats = {
+            "gamesplayed": socket.request.user.gamesplayed,
+            "wins": socket.request.user.wins,
+            "losses": socket.request.user.wins
+        }
         socket.emit('accountUserInfo', data);
-        // TODO: get user statistics here
-        socket.emit('accountUserStats', "not implemented yet");
+        socket.emit('accountUserStats', stats);
     });
 
-    // ACCOUNT PAGE - create game
+    // ===== ACCOUNT PAGE =================================================== //
+
+    // ACCOUNT PAGE - create room
     socket.on('createGame', () => {
         console.log("createGame");
-        let newRoom = new Room();                       // Create new Room
-        newRoom.addPlayer(socket.request.user);         // Add self to Player list in Room
-        socket.join(newRoom.roomCode);                  // Join Socket IO Room
-        roomCollection.push(newRoom);                   // Push room to DB (temporary array)
-        socket.emit('roomCode', newRoom.roomCode);      // Send room to user
+        let user = socket.request.user;
+        let room = new Room(user._id);                              // Create new Room
+        room.playerManager.addPlayer(user);                         // Add self to userlist in Room
+        room.playerManager.getPlayer(user._id).roomCreator = true;
+        roomCollection.push(room);                                  // Push room to DB (temporary array)
+        socket.emit('roomCode', room.roomCode);                     // Send roomCode to user
     });
 
-    // ACCOUNT PAGE - join game
+    // ACCOUNT PAGE - join room
     socket.on('joinGame', (code) => {
         console.log("joinGame:" + code);
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
         if (room) {
-            room.addPlayer(socket.request.user);
-            socket.join(room.roomCode);
-            socket.emit('roomCode', room.roomCode);
-            io.to(room.roomCode).emit('roomUpdate', room);
-            io.to(room.roomCode).emit('playerListUpdate', room.playerList);
+            room.playerManager.addPlayer(socket.request.user);                                // Add self to userlist in Room
+            socket.emit('roomCode', room.roomCode);                             // Send roomCode to user
+            io.to(room.roomCode).emit('playerListUpdate', room.userlist);         // notify subscribers
         } else {
             // TODO: Error handling
         }
     });
 
     // ===== ROOM PAGE ====================================================== //
-    socket.on('roomSetup', (code) => {
-        console.log("roomSetup");
-        let room = roomCollection.find(({ roomCode }) => roomCode === code);
-        if (room) {
-            //room.addPlayer(socket.request.user);
-            //socket.join(room.roomCode);
-            socket.emit('roomUpdate', room);
-            io.to(room.roomCode).emit('playerListUpdate', room.playerList);
-            //io.to(room.roomCode).emit("roomUpdate", room);     // TODO: decompose Room to components for efficiency
-        } else {
-            // TODO: Error handling
-        }
+
+    // ===== USERLIST PAGE ================================================== //
+
+    // GAME_STATE_PENDING 
+    socket.on('playerListInit', (gameCode) => {
+        console.log("playerListInit: " + socket.request.user.username + ":" + gameCode);
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        socket.join(room.roomCode); 
+        sendPlayerList(room, socket.request.user);
     });
 
-    socket.on('roomPlayerList', (gameCode)=>{
+    socket.on('playerListReady', (gameCode) => {
+        console.log("playerListReady: " + socket.request.user.username + ":" + gameCode);
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
-        socket.emit('playerListUpdate', room.playerList);
-        // let room = roomCollection.find(({ roomCode }) => roomCode === socket.room);
-        // socket.emit('playerListUpdate', room.playerList);
+        let toggle = room.playerManager.getPlayer(socket.request.user._id).gameReady
+        room.playerManager.getPlayer(socket.request.user._id).gameReady = !toggle;
+        sendPlayerList(room, socket.request.user);
+    });
+
+    socket.on('playerListStart', (gameCode) => {
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let toggle = room.playerManager.getPlayer(socket.request.user._id).gameReady
+        room.playerManager.getPlayer(socket.request.user._id).gameReady = !toggle;
+        room.gameManager.nextGameState();
+        sendPlayerList(room, socket.request.user);
     })
+
+    // STANDARD REPLIES
+    function sendPlayerList(room, user) {
+        console.log("sendPlayerList: " + room.gameManager.state);
+        io.in(room.roomCode).emit('playerListUpdate', {
+            gameState: room.gameManager.state,
+            playerList: room.playerManager.playerList,
+        });
+    }
 
 
     // ===== CHAT COMPONENT ================================================= //
+    
+    // NOTE CHECK ROOM ORDER WHEN INIT ******* ** ** ** *****
+
     socket.on('newMessage', (code, data) => {
+        
         console.log("newMessage");
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
-        if(room){
+        if (room) {
             room.chatSession.newMessage(socket.request.user._id, data);
             io.to(room.roomCode).emit('updateMessage', {
-                messageList: room.chatSession.messageList, 
-                playerList: room.playerList
+                messageList: room.chatSession.messageList,
+                playerList: room.playerManager.playerList
             });
             socket.emit('updateMessage', {
-                messageList: room.chatSession.messageList, 
-                playerList: room.playerList
+                messageList: room.chatSession.messageList,
+                playerList:  room.playerManager.playerList
             });
-        }else {
+        } else {
             // TODO: Error Handling
         }
     });
 
-    
+
     socket.on('roomMessageList', (code) => {
         console.log("roomMessageList");
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
-        if(room){
+        if (room) {
             socket.emit('updateMessage', {
-                messageList: room.chatSession.messageList, 
-                playerList: room.playerList
+                messageList: room.chatSession.messageList,
+                playerList:  room.playerManager.playerList
             });
-        }else {
+        } else {
             // TODO: Error Handling
         }
     });

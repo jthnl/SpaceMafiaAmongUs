@@ -20,13 +20,12 @@
 module.exports = {
   name: "room",
   mounted() {
+    console.log("room opened");
     this.$socket.open();
-    console.log("room");
     if (localStorage.getItem("gameCode") === null) {
       this.$router.push({ name: "account" });
     }
     this.gameCode = localStorage.getItem("gameCode");
-    this.$socket.emit("roomSetup", this.gameCode);
   },
   components: {
     "chat-component": httpVueLoader("/js/components/ChatComponent.vue"),
@@ -35,14 +34,8 @@ module.exports = {
   data: function () {
     return {
       me: [],
-      gameCode: [],
-      roomObj: [],
+      gameCode: ""
     };
-  },
-  created: function () {
-    this.sockets.subscribe("roomUpdate", (data) => {
-      this.roomObj = data;
-    });
   },
 };
 </script>
