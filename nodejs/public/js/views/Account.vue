@@ -50,6 +50,7 @@ module.exports = {
       me: [],
       myStats: [],
       gameCode: "",
+      errorMsg: ""
     };
   },
   created: function () {
@@ -67,6 +68,10 @@ module.exports = {
       localStorage.setItem("gameCode", this.gameCode);
       this.$router.push({ name: "room" });
       this.gameCode = "";
+    });
+
+    this.sockets.subscribe("accountErrorMessage", (data) => {
+      this.errorMsg = data;
     });
   },
   methods: {

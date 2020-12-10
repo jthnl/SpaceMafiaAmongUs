@@ -10,7 +10,7 @@ const ChatManager = require('./ChatManager');
 const GameManager = require('../gameboard/GameManager');
 
 module.exports = class Room {
-    
+
     constructor(creatorID) {
         this.creatorID = creatorID;                                    
         this.roomCode = Room.generateRoomCode(4);
@@ -18,6 +18,7 @@ module.exports = class Room {
         this.gameManager = new GameManager(this.playerManager);
         this.chatManager = new ChatManager(this.playerManager);
     }
+    
 
     // generates a random string of length len
     static generateRoomCode(len) {

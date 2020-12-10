@@ -31,6 +31,17 @@ module.exports = class PlayerManager {
         return null;
     }
 
+    playersReady(){
+        let players = this.playerList.filter(user => user.roomCreator !== true);
+        let allReady = true;
+        for(let i = 0; i < players.length; i++){
+            if(players[i].gameReady === false){
+                allReady = false;
+            }
+        }
+        return allReady;
+    }
+
     printList() {
         console.log(JSON.stringify(this.playerList, null, 1));
     }

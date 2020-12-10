@@ -37,6 +37,7 @@ module.exports = class GameManager {
         this.playerManager = playerManager;             // playerManager from the room
         this.game = new Game(this.playerManager);       // create a new Game Object
         this.state = GAME_STATE_PENDING;                // set initial game state
+        this.gameActive = false;                        // game currently ongoing
         this.failedVotes = 0;                           // counts for 5 successive fails, immediete fail
     }
 
@@ -45,6 +46,7 @@ module.exports = class GameManager {
         switch (this.state) {
             case GAME_STATE_PENDING:
                 // initialize game
+                this.gameActive = true;
                 this.game.init();
                 this.game.assign_roles();
                 this.printStateDebug(GAME_STATE_PENDING, GAME_STATE_TEAMBUILD);
@@ -88,6 +90,7 @@ module.exports = class GameManager {
                 let gameDone = this.game.check_win();
                 if (gameDone) {
                     // either team has won
+                    this.gameActive = false;
                     this.printStateDebug(GAME_STATE_QUEST, GAME_STATE_END);
                     this.state = GAME_STATE_END;
                 } else {
@@ -104,6 +107,30 @@ module.exports = class GameManager {
 
             default:
                 console.log("someone messed up, the game should not be in this state.");
+        }
+    }
+
+    // returns game state
+    getState(){
+        return this.state;
+    }
+
+    // captain picks player for the quest
+    addPlayerToTeam(pick_id){
+        return this.game.add_player_to_team(pick_id);
+    }
+
+    // player approves or rejects the quest
+    voteForTeam(player, vote){
+        if(player.team_voting_enabled){
+            return this.game.vote_for_team(player, vote);
+        }
+    }
+
+    // quest member succeeds or fails the quest
+    voteForQuest(player, vote){
+        if(player.quest_voting_enabled){
+            return this.game.current_quest.vote_for_quest(player, vote);
         }
     }
 
