@@ -40,7 +40,7 @@ db(async (client) => {
     routes(app, dbm);                            // HTTP routes
 
     io.on('connection', (socket) => {            // SocketIO Setup. Needs authentication
-        socketlogic(io, socket);
+        socketlogic(io, socket, dbm);
     });
     
 }).catch((e) => {

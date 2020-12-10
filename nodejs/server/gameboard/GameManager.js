@@ -102,7 +102,8 @@ module.exports = class GameManager {
 
 
             case GAME_STATE_END:
-                    // TODO: reset game
+                this.printStateDebug(GAME_STATE_END, GAME_STATE_PENDING);
+                this.state = GAME_STATE_PENDING;
                 break;
 
             default:
@@ -131,6 +132,24 @@ module.exports = class GameManager {
     voteForQuest(player, vote){
         if(player.quest_voting_enabled){
             return this.game.current_quest.vote_for_quest(player, vote);
+        }
+    }
+
+    // returns quest history
+    getQuestHistory(){
+        let gameHistory = {
+            currentQuest: this.game.current_quest,
+            questHistory: this.game.quests
+        }
+        return gameHistory;
+    }
+
+    // returns the winner of the game
+    getWinner(){
+        if(this.state === GAME_STATE_END){
+            return this.game.get_winner();
+        } else {
+            return "Undetermined";
         }
     }
 

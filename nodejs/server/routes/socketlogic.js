@@ -13,9 +13,12 @@ const GAME_STATE_TEAMVOTE = 2;
 const GAME_STATE_QUEST = 3;
 const GAME_STATE_END = 4;
 
+const INNOCENT_ROLE = "INNOCENT";
+const TRAITOR_ROLE = "TRAITOR";
+
 let roomCollection = [];    // TODO: Save to database for persistence
 
-module.exports = function (io, socket) {
+module.exports = function (io, socket, db) {
 
     // whoAmI - returns user information and statistics
     socket.on('whoAmI', () => {
@@ -28,7 +31,7 @@ module.exports = function (io, socket) {
         stats = {
             "gamesplayed": socket.request.user.gamesplayed,
             "wins": socket.request.user.wins,
-            "losses": socket.request.user.wins
+            "losses": socket.request.user.losses
         }
         socket.emit('accountUserInfo', data);
         socket.emit('accountUserStats', stats);
@@ -213,6 +216,9 @@ module.exports = function (io, socket) {
             let allVoted = room.gameManager.voteForQuest(player, true);
             if (allVoted) {
                 room.gameManager.nextGameState();
+                if (room.gameManager.getState() === GAME_STATE_END) {
+                    endGame(room);
+                }
             }
             sendPlayerList(room);
             sendGameUpdate(room);
@@ -228,11 +234,47 @@ module.exports = function (io, socket) {
             let allVoted = room.gameManager.voteForQuest(player, false);
             if (allVoted) {
                 room.gameManager.nextGameState();
+                if (room.gameManager.getState() === GAME_STATE_END) {
+                    endGame(room);
+                }
             }
             sendPlayerList(room);
             sendGameUpdate(room);
         }
     });
+
+    
+    // set new game when old game ends
+    socket.on('newGame', (gameCode) => {
+        console.log("newGame.");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
+        if (player.roomCreator && room.gameManager.getState() === GAME_STATE_END) {
+            room.gameManager.nextGameState();
+            sendPlayerList(room);
+            sendGameUpdate(room);
+        }
+    });
+
+    // update player's scores
+    function endGame(room) {
+        let winner = room.gameManager.getWinner();
+        let players = room.playerManager.playerList;
+        for (let i = 0; i < players.length; i++) {
+            let query = { _id: players[i]._id};
+            let change = {};
+            if (JSON.stringify(players[i].role) === JSON.stringify(winner)) {
+                change = { $inc: { wins: 1 , gamesplayed: 1} };
+            } else {
+                change = { $inc: { losses: 1 , gamesplayed: 1} };
+            }
+            db.updateOne(query, change, function(err, res) {
+                if(err){
+                    console.log("unable to update statistics");
+                }
+            });
+        }
+    }
 
     // standardized game-component reply
     function sendGameUpdate(room) {
@@ -240,7 +282,8 @@ module.exports = function (io, socket) {
         io.in(room.roomCode).emit('gameUpdate', {
             gameState: room.gameManager.state,
             playerList: room.playerManager.playerList,
-            // gameHistory: room.gameManager.?            // Not implemented yet
+            gameHistory: room.gameManager.getQuestHistory(),
+            gameWinner: room.gameManager.getWinner()
         });
     }
 

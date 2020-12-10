@@ -111,7 +111,7 @@ module.exports = class Game {
 
     create_quests() {
         for (let i = 0; i < this.quest_team_sizes.length; i++) {
-            this.quests.push(new Quest(this.quest_team_sizes[i]));
+            this.quests.push(new Quest(this.quest_team_sizes[i], i));
         }
 
         this.current_quest = this.quests[0];
@@ -263,6 +263,16 @@ module.exports = class Game {
         return false;
     }
 
+    get_winner() {
+        if (this.game_complete) {
+            if (this.traitor_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN) {
+                return TRAITOR_ROLE;
+            } else {
+                return INNOCENT_ROLE;
+            }
+        }
+    }
+
     print_game_status(message) {
         console.log("****************************************");
         console.log(message);
@@ -273,7 +283,8 @@ module.exports = class Game {
 
 // A quest in Space Mafia Among Us.
 class Quest {
-    constructor(number_of_quest_players) {
+    constructor(number_of_quest_players, round) {
+        this.quest_round = round;
         this.number_of_quest_players = number_of_quest_players;
         this.number_of_quest_succeses = 0;
         this.number_of_quest_fails = 0;

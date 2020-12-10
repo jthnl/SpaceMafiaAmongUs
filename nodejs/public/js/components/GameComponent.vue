@@ -15,6 +15,7 @@
         <p><button v-on:click="reject()">reject</button></p>
         <p><button v-on:click="success()">success</button></p>
         <p><button v-on:click="fail()">fail</button></p>
+        <p><button v-on:click="newGame()">new game</button></p>
     </div>
     
 </template>
@@ -69,6 +70,10 @@ module.exports = {
     fail: function(){
         console.log("fail");
         this.$socket.emit("fail", this.gameCode);
+    },
+    newGame: function(){
+        console.log("newGame");
+        this.$socket.emit("newGame", this.gameCode);
     }
   },
   computed: {
