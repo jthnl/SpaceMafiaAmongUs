@@ -18,9 +18,9 @@
       </div>
       <div class="account-info">
         <h2>Stats</h2>
-        <p>Games Played:</p>
-        <p>Wins:</p>
-        <p>Losses:</p>
+        <p>Games Played: {{ myStats.gamesplayed }}</p>
+        <p>Wins:  {{ myStats.wins }}</p>
+        <p>Losses:  {{ myStats.losses }}</p>
       </div>
       <div>
         <p>
@@ -48,7 +48,9 @@ module.exports = {
   data: function () {
     return {
       me: [],
+      myStats: [],
       gameCode: "",
+      errorMsg: ""
     };
   },
   created: function () {
@@ -57,11 +59,19 @@ module.exports = {
       this.me = data;
     });
 
+    this.sockets.subscribe("accountUserStats", (data) => {
+      this.myStats = data;
+    });
+
     this.sockets.subscribe("roomCode", (data) => {
       this.gameCode = data;
       localStorage.setItem("gameCode", this.gameCode);
       this.$router.push({ name: "room" });
       this.gameCode = "";
+    });
+
+    this.sockets.subscribe("accountErrorMessage", (data) => {
+      this.errorMsg = data;
     });
   },
   methods: {

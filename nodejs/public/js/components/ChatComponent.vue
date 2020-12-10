@@ -25,7 +25,7 @@ module.exports = {
   mounted() {
     //this.$socket.open();
     console.log("Chat component added");
-    this.$socket.emit("roomMessageList", localStorage.getItem("gameCode"));
+    this.$socket.emit("chatComponentInit", localStorage.getItem("gameCode"));
   },
   data: function () {
     return {
@@ -36,7 +36,7 @@ module.exports = {
   },
   created: function () {
     //    SOCKET IO LISTENERS
-    this.sockets.subscribe("updateMessage", (data) => {
+    this.sockets.subscribe("messageUpdate", (data) => {
       this.messageList = data.messageList;
       this.playerList = data.playerList;
     });

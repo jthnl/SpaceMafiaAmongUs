@@ -9,9 +9,7 @@
       </div>
       <userlist-component></userlist-component>
       <chat-component></chat-component>
-      <div class="grid-item-info">
-        <h2>Information</h2>
-      </div>
+      <game-component></game-component>
     </div>
   </div>
 </template>
@@ -20,29 +18,23 @@
 module.exports = {
   name: "room",
   mounted() {
+    console.log("room opened");
     this.$socket.open();
-    console.log("room");
     if (localStorage.getItem("gameCode") === null) {
       this.$router.push({ name: "account" });
     }
     this.gameCode = localStorage.getItem("gameCode");
-    this.$socket.emit("roomSetup", this.gameCode);
   },
   components: {
     "chat-component": httpVueLoader("/js/components/ChatComponent.vue"),
     "userlist-component": httpVueLoader("/js/components/UserlistComponent.vue"),
+    "game-component": httpVueLoader("/js/components/GameComponent.vue"),
   },
   data: function () {
     return {
       me: [],
-      gameCode: [],
-      roomObj: [],
+      gameCode: ""
     };
-  },
-  created: function () {
-    this.sockets.subscribe("roomUpdate", (data) => {
-      this.roomObj = data;
-    });
   },
 };
 </script>
