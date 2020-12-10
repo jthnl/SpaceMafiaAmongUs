@@ -57,21 +57,20 @@ const QUEST_TEAM_SIZES_FOR_6 = [
 
 module.exports = class Game {
 
-    constructor() {
+    constructor(playerManager) {
         // Start a game with 5 players by default
-        this.init(NUMBER_OF_PLAYERS_FOR_5);
+        this.playerManager = playerManager;
     }
 
-    init(number_of_players) {
-        if (number_of_players === undefined) {
+    init() {
+        this.number_of_players = this.playerManager.getPlayerCount();
+        if (this.number_of_players === undefined) {
             throw 'Undefined number of players!'
         }
 
-        if (number_of_players < MIN_NUMBER_OF_PLAYERS || number_of_players > MAX_NUMBER_OF_PLAYERS) {
+        if (this.number_of_players < MIN_NUMBER_OF_PLAYERS || this.number_of_players > MAX_NUMBER_OF_PLAYERS) {
             throw 'Invalid number of players!';
         }
-
-        this.number_of_players = number_of_players;
 
         switch (this.number_of_players) {
             case NUMBER_OF_PLAYERS_FOR_5:
@@ -104,7 +103,7 @@ module.exports = class Game {
         this.current_quest = null;
 
         // List variables
-        this.players = [];
+        // this.playerManager = playerManager;
         this.quests = [];
 
         this.create_quests();
@@ -118,62 +117,67 @@ module.exports = class Game {
         this.current_quest = this.quests[0];
     }
 
-    add_player(player) {
-        if (this.players.length >= this.number_of_players) {
-            throw 'Maximum number of players reached!';
-        }
+    // add_player(player) {
+    //     if (this.players.length >= this.number_of_players) {
+    //         throw 'Maximum number of players reached!';
+    //     }
 
-        this.players.push(player);
-    }
+    //     this.players.push(player);
+    // }
 
     assign_roles() {
         let number_of_innocent_roles_assigned = 0;
         let number_of_traitor_roles_assigned = 0;
 
-        for (let i = 0; i < this.players.length; i++) {
+        for (let i = 0; i < this.playerManager.getPlayerCount(); i++) {
             // If there are no more traitor roles to assign, assign innocent role
             if (number_of_traitor_roles_assigned >= this.number_of_traitor_players) {
-                this.players[i].role = INNOCENT_ROLE;
+                this.playerManager.playerList[i].role = INNOCENT_ROLE;
                 continue;
             }
 
             // If there are no more innocent roles to assign, assign traitor role
             if (number_of_innocent_roles_assigned >= this.number_of_innocent_players) {
-                this.players[i].role = TRAITOR_ROLE;
+                this.playerManager.playerList[i].role = TRAITOR_ROLE;
                 continue;
             }
 
             // If randomly generated number is in range [0, 0.5), assign innocent role
             if (Math.random() < 0.5) {
-                this.players[i].role = INNOCENT_ROLE;
+                this.playerManager.playerList[i].role = INNOCENT_ROLE;
                 number_of_innocent_roles_assigned++;
             }
             // If randomly generated number is in range [0.5, 1], assign traitor role
             else {
-                this.players[i].role = TRAITOR_ROLE;
+                this.playerManager.playerList[i].role = TRAITOR_ROLE;
                 number_of_traitor_roles_assigned++;
             }
         }
 
         // Choose a random captain
         this.captain_index = Math.floor(Math.random() * this.number_of_players);
-        this.players[this.captain_index].is_captain = true;
+        this.playerManager.playerList[this.captain_index].is_captain = true;
     }
 
-    add_player_to_team(player) {
+    add_player_to_team(pick_id) {
         if (this.number_of_team_players >= this.quest_team_sizes[this.quest_team_size_index]) {
             throw 'Maximum number of team players reached!';
         }
 
-        this.players.find(p => p === player).on_team = true;
+        let player = this.playerManager.getPlayer(pick_id);
+        player.on_team = true;
         this.number_of_team_players++;
         this.quests[this.quest_team_size_index].add_player_to_quest(player);
+
+        return this.quest_team_sizes[this.quest_team_size_index] - this.number_of_team_players;
     }
 
     enable_team_voting() {
-        for (let i = 0; i < this.players.length; i++) {
-            this.players[i].team_voting_enabled = true;
+        console.log("enable_team_voting");
+        for (let i = 0; i < this.playerManager.getPlayerCount(); i++) {
+            this.playerManager.playerList[i].team_voting_enabled = true;
         }
+        console.log("ENABLED: " + JSON.stringify(this.playerManager));
     }
 
     vote_for_team(player, vote) {
@@ -193,6 +197,14 @@ module.exports = class Game {
 
         // Disable team voting
         player.team_voting_enabled = false;
+
+        // check if everyone has voted
+        for (let i = 0; i < this.playerManager.getPlayerCount(); i++) {
+            if (this.playerManager.playerList[i].team_voting_enabled == true) {
+                return false;
+            }
+        }
+        return true;
     }
 
     try_to_start_quest() {
@@ -203,8 +215,8 @@ module.exports = class Game {
         }
         // If team is refused by a majority of players, remove everyone on_team
         else {
-            for (let i = 0; i < this.players.length; i++) {
-                this.players[i].on_team = false;
+            for (let i = 0; i < this.playerManager.getPlayerCount(); i++) {
+                this.playerManager.playerList[i].on_team = false;
             }
 
             this.current_quest.reset();
@@ -215,13 +227,14 @@ module.exports = class Game {
         this.number_of_team_approval = 0;
         this.number_of_team_refusal = 0;
 
-        this.players[this.captain_index].is_captain = false;
+        this.playerManager.playerList[this.captain_index].is_captain = false;
 
         // Increment captain index, but loop back to the beginning of the array if we reach the end
         let new_captain_index = this.captain_index + 1;
         this.captain_index = new_captain_index < this.number_of_players ? new_captain_index : 0;
 
-        this.players[this.captain_index].is_captain = true;
+        this.playerManager.playerList[this.captain_index].is_captain = true;
+        return this.quest_in_progress;
     }
 
     resolve_quest() {
@@ -242,11 +255,12 @@ module.exports = class Game {
         if (this.traitor_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN ||
             this.innocent_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN) {
             this.game_complete = true;
-
             console.log("Check win: game complete");
+            return true;
         }
 
         console.log("Check win: no winner yet");
+        return false;
     }
 
     print_game_status(message) {
@@ -302,6 +316,14 @@ class Quest {
 
         // Disable quest voting
         player.quest_voting_enabled = false;
+
+        // check if everyone has voted
+        for (let i = 0; i < this.number_of_quest_players; i++) {
+            if (this.quest_players[i].quest_voting_enabled == true) {
+                return false;
+            }
+        }
+        return true;
     }
 
     reset() {

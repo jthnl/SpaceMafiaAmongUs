@@ -15,9 +15,10 @@ module.exports = class PlayerManager {
         return this.playerList.length;
     }
 
-    getPlayer(value) {
+    getPlayer(pick_id) {
         let usr = this.playerList.find((user) => {
-            return user._id === value;
+            return JSON.stringify(pick_id) === JSON.stringify(user._id);
+            
         });
         if (usr) {
             return usr;

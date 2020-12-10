@@ -9,9 +9,7 @@
       </div>
       <userlist-component></userlist-component>
       <chat-component></chat-component>
-      <div class="grid-item-info">
-        <h2>Information</h2>
-      </div>
+      <game-component></game-component>
     </div>
   </div>
 </template>
@@ -30,6 +28,7 @@ module.exports = {
   components: {
     "chat-component": httpVueLoader("/js/components/ChatComponent.vue"),
     "userlist-component": httpVueLoader("/js/components/UserlistComponent.vue"),
+    "game-component": httpVueLoader("/js/components/GameComponent.vue"),
   },
   data: function () {
     return {

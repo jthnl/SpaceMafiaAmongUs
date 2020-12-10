@@ -91,7 +91,7 @@ module.exports = function (io, socket) {
 
     // STANDARD REPLIES
     function sendPlayerList(room, user) {
-        console.log("sendPlayerList: " + room.gameManager.state);
+        console.log("sendPlayerList: " + room.gameManager.state + ":"+ JSON.stringify(room.playerManager.playerList, null, 1));
         io.in(room.roomCode).emit('playerListUpdate', {
             gameState: room.gameManager.state,
             playerList: room.playerManager.playerList,
@@ -136,9 +136,97 @@ module.exports = function (io, socket) {
         }
     });
 
+    // ===== GAME COMPONENT ================================================= //
+
+    // GAME_STATE_PENDING 
+    socket.on('gameInit', (gameCode) => {
+        console.log("gameInit: " + socket.request.user.username + ":" + gameCode);
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        socket.join(room.roomCode); 
+        sendGameUpdate(room, socket.request.user);
+    });
+
+    socket.on('pick', (gameCode, pick_id) => {
+        console.log("pick.");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
+        
+        if(player.is_captain){
+            console.log("captain picked:" + pick_id);
+            let picksLeft = room.gameManager.game.add_player_to_team(pick_id);
+            console.log("picks left: " + picksLeft);
+            if(picksLeft == 0){
+                console.log("pick - next state");
+                room.gameManager.nextGameState();
+            }
+            sendPlayerList(room, socket.request.user);
+            sendGameUpdate(room, socket.request.user);
+        } else {
+            //send error
+        }
+    });
+
+    socket.on('approve', (gameCode) => {
+        console.log("approve.");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
+        let allVoted = room.gameManager.game.vote_for_team(player, true);
+        if(allVoted){
+            room.gameManager.nextGameState();
+        }
+        sendPlayerList(room, socket.request.user);
+        sendGameUpdate(room, socket.request.user);
+    });
+
+    socket.on('reject', (gameCode) => {
+        console.log("reject.");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
+        let allVoted = room.gameManager.game.vote_for_team(player, false);
+        if(allVoted){
+            room.gameManager.nextGameState();
+        }
+        sendPlayerList(room, socket.request.user);
+        sendGameUpdate(room, socket.request.user);
+    });
+
+    socket.on('success', (gameCode) => {
+        console.log("success.");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
+        let allVoted = room.gameManager.game.current_quest.vote_for_quest(player, true);
+        if(allVoted){
+            room.gameManager.nextGameState();
+        }
+        sendPlayerList(room, socket.request.user);
+        sendGameUpdate(room, socket.request.user);
+    });
+
+    socket.on('fail', (gameCode) => {
+        console.log("fail.");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
+        let allVoted = room.gameManager.game.current_quest.vote_for_quest(player, false);
+        if(allVoted){
+            room.gameManager.nextGameState();
+        }
+        sendPlayerList(room, socket.request.user);
+        sendGameUpdate(room, socket.request.user);
+    });
 
 
 
+
+
+    // STANDARD REPLIES
+    function sendGameUpdate(room, user) {
+        console.log("sendGame: " + room.gameManager.state);
+        io.in(room.roomCode).emit('gameUpdate', {
+            gameState: room.gameManager.state,
+            playerList: room.playerManager.playerList,
+            // gameHistory: room.gameManager.?            // Not implemented yet
+        });
+    }
 
 };
 

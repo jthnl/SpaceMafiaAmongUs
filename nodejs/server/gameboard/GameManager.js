@@ -11,7 +11,7 @@ module.exports = class GameManager {
 
     constructor(playerManager) {
         this.playerManager = playerManager;
-        this.game = new Game();
+        this.game = new Game(this.playerManager);
         this.state = GAME_STATE_PENDING;
     }
 
@@ -19,13 +19,41 @@ module.exports = class GameManager {
         switch (this.state) {
             case GAME_STATE_PENDING:
                 console.log("\n\n\nINITIALIZE GAME\n\n\n");
-                this.game.init(this.playerManager.getPlayerCount());
+                console.log(this.playerManager.getPlayerCount());
+                this.game.init();
+                console.log("\n 1 ");
+                this.game.assign_roles();
+                console.log("\n 2");
+                this.state = GAME_STATE_TEAMBUILD;
+                console.log("\n 3");
                 break;
-            case GAME_STATE_TEAMBUILD: 
+            case GAME_STATE_TEAMBUILD:
+                console.log("\n\n GAME_STATE_TEAMBUILD -> GAME_STATE_TEAMVOTE \n\n");
+                this.game.enable_team_voting();
+                this.state = GAME_STATE_TEAMVOTE;
                 break;
             case GAME_STATE_TEAMVOTE:
+                let questStarted = this.game.try_to_start_quest();
+                if(questStarted){
+                    this.game.current_quest.enable_quest_voting();
+                    this.state = GAME_STATE_QUEST;
+                    console.log("\n\n GAME_STATE_TEAMVOTE -> GAME_STATE_QUEST \n\n");
+                }else{
+                    this.state = GAME_STATE_TEAMBUILD;
+                    console.log("\n\n GAME_STATE_TEAMVOTE -> GAME_STATE_TEAMBUILD \n\n");
+                }
                 break;
             case GAME_STATE_QUEST:
+                console.log("\n\n GAME_STATE_QUEST \n\n");
+                this.game.resolve_quest();
+                let gameDone = this.game.check_win();
+                if(gameDone){
+                    console.log("\n\n GAME_STATE_QUEST -> GAME_STATE_END \n\n");
+                    this.state = GAME_STATE_END;
+                }else{
+                    console.log("\n\n GAME_STATE_QUEST -> GAME_STATE_TEAMBUILD \n\n");
+                    this.state = GAME_STATE_TEAMBUILD;
+                }
                 break;
             case GAME_STATE_END:
                 break;
