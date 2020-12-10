@@ -3,8 +3,14 @@
         <h2>Game</h2>
 
         <!-- Temporary - should change to selectable user list -->
-         <input id="message" autocomplete="off" placeholder="username" v-model="pickChoice"/>
-        <p><button v-on:click="pick()">pick</button></p>
+        <!-- <input id="message" autocomplete="off" placeholder="username" v-model="pickChoice"/>
+        <p><button v-on:click="pick()">pick</button></p> -->
+        
+        <div v-for="player in otherPlayers" :key="player._id">
+          <p><button v-on:click="pick(player._id)">{{player.username}}</button></p>
+        </div>
+
+        
         <p><button v-on:click="approve()">approve</button></p>
         <p><button v-on:click="reject()">reject</button></p>
         <p><button v-on:click="success()">success</button></p>
@@ -30,7 +36,6 @@ module.exports = {
         gameState: 0,
         playerList: [],
         gameHistory: [],
-        pickChoice: "",
     };
   },
   created: function () {
@@ -45,9 +50,9 @@ module.exports = {
     });
   },
   methods: {
-    pick: function () {
+    pick: function (chosen_id) {
         console.log("pick");
-        this.$socket.emit("pick", this.gameCode, this.pickChoice);
+        this.$socket.emit("pick", this.gameCode, chosen_id);
     },
     approve: function () {
         console.log("approve");
@@ -66,6 +71,13 @@ module.exports = {
         this.$socket.emit("fail", this.gameCode);
     }
   },
+  computed: {
+    otherPlayers() {
+      return this.playerList.filter(
+        player => {return player._id != this.me._id}
+      );
+    },
+  }
 };
 </script>
 

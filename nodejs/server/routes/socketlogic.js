@@ -6,7 +6,6 @@
  */
 
 const Room = require('../models/Room');
-const GameManager = require('../gameboard/GameManager');
 
 const GAME_STATE_PENDING = 0;
 const GAME_STATE_TEAMBUILD = 1;
@@ -14,11 +13,13 @@ const GAME_STATE_TEAMVOTE = 2;
 const GAME_STATE_QUEST = 3;
 const GAME_STATE_END = 4;
 
-let roomCollection = [];    // TODO: Save to database
+let roomCollection = [];    // TODO: Save to database for persistence
 
 module.exports = function (io, socket) {
 
-    // whoAmI - returns to the user their account information and statistics 
+    /**
+     * whoAmI - returns user information and statistics
+     */
     socket.on('whoAmI', () => {
         data = {
             "_id": socket.request.user._id,
@@ -53,9 +54,9 @@ module.exports = function (io, socket) {
         console.log("joinGame:" + code);
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
         if (room) {
-            room.playerManager.addPlayer(socket.request.user);                                // Add self to userlist in Room
+            room.playerManager.addPlayer(socket.request.user);                  // Add self to userlist in Room
             socket.emit('roomCode', room.roomCode);                             // Send roomCode to user
-            io.to(room.roomCode).emit('playerListUpdate', room.userlist);         // notify subscribers
+            io.to(room.roomCode).emit('playerListUpdate', room.userlist);       // notify subscribers
         } else {
             // TODO: Error handling
         }
@@ -69,7 +70,7 @@ module.exports = function (io, socket) {
     socket.on('playerListInit', (gameCode) => {
         console.log("playerListInit: " + socket.request.user.username + ":" + gameCode);
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
-        socket.join(room.roomCode); 
+        socket.join(room.roomCode);
         sendPlayerList(room, socket.request.user);
     });
 
@@ -91,7 +92,7 @@ module.exports = function (io, socket) {
 
     // STANDARD REPLIES
     function sendPlayerList(room, user) {
-        console.log("sendPlayerList: " + room.gameManager.state + ":"+ JSON.stringify(room.playerManager.playerList, null, 1));
+        console.log("sendPlayerList: " + room.gameManager.state + ":" + JSON.stringify(room.playerManager.playerList, null, 1));
         io.in(room.roomCode).emit('playerListUpdate', {
             gameState: room.gameManager.state,
             playerList: room.playerManager.playerList,
@@ -100,22 +101,23 @@ module.exports = function (io, socket) {
 
 
     // ===== CHAT COMPONENT ================================================= //
-    
+
     // NOTE CHECK ROOM ORDER WHEN INIT ******* ** ** ** *****
 
     socket.on('newMessage', (code, data) => {
-        
+
         console.log("newMessage");
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
+        let player = room.playerManager.getPlayer(socket.request.user._id);
         if (room) {
-            room.chatSession.newMessage(socket.request.user._id, data);
+            room.chatManager.newMessage(player, data);
             io.to(room.roomCode).emit('updateMessage', {
-                messageList: room.chatSession.messageList,
+                messageList: room.chatManager.messageList,
                 playerList: room.playerManager.playerList
             });
             socket.emit('updateMessage', {
-                messageList: room.chatSession.messageList,
-                playerList:  room.playerManager.playerList
+                messageList: room.chatManager.messageList,
+                playerList: room.playerManager.playerList
             });
         } else {
             // TODO: Error Handling
@@ -128,8 +130,8 @@ module.exports = function (io, socket) {
         let room = roomCollection.find(({ roomCode }) => roomCode === code);
         if (room) {
             socket.emit('updateMessage', {
-                messageList: room.chatSession.messageList,
-                playerList:  room.playerManager.playerList
+                messageList: room.chatManager.messageList,
+                playerList: room.playerManager.playerList
             });
         } else {
             // TODO: Error Handling
@@ -142,7 +144,7 @@ module.exports = function (io, socket) {
     socket.on('gameInit', (gameCode) => {
         console.log("gameInit: " + socket.request.user.username + ":" + gameCode);
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
-        socket.join(room.roomCode); 
+        socket.join(room.roomCode);
         sendGameUpdate(room, socket.request.user);
     });
 
@@ -150,12 +152,12 @@ module.exports = function (io, socket) {
         console.log("pick.");
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
         let player = room.playerManager.getPlayer(socket.request.user._id);
-        
-        if(player.is_captain){
+
+        if (player.is_captain) {
             console.log("captain picked:" + pick_id);
             let picksLeft = room.gameManager.game.add_player_to_team(pick_id);
             console.log("picks left: " + picksLeft);
-            if(picksLeft == 0){
+            if (picksLeft == 0) {
                 console.log("pick - next state");
                 room.gameManager.nextGameState();
             }
@@ -171,7 +173,7 @@ module.exports = function (io, socket) {
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
         let player = room.playerManager.getPlayer(socket.request.user._id);
         let allVoted = room.gameManager.game.vote_for_team(player, true);
-        if(allVoted){
+        if (allVoted) {
             room.gameManager.nextGameState();
         }
         sendPlayerList(room, socket.request.user);
@@ -183,7 +185,7 @@ module.exports = function (io, socket) {
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
         let player = room.playerManager.getPlayer(socket.request.user._id);
         let allVoted = room.gameManager.game.vote_for_team(player, false);
-        if(allVoted){
+        if (allVoted) {
             room.gameManager.nextGameState();
         }
         sendPlayerList(room, socket.request.user);
@@ -195,7 +197,7 @@ module.exports = function (io, socket) {
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
         let player = room.playerManager.getPlayer(socket.request.user._id);
         let allVoted = room.gameManager.game.current_quest.vote_for_quest(player, true);
-        if(allVoted){
+        if (allVoted) {
             room.gameManager.nextGameState();
         }
         sendPlayerList(room, socket.request.user);
@@ -207,16 +209,12 @@ module.exports = function (io, socket) {
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
         let player = room.playerManager.getPlayer(socket.request.user._id);
         let allVoted = room.gameManager.game.current_quest.vote_for_quest(player, false);
-        if(allVoted){
+        if (allVoted) {
             room.gameManager.nextGameState();
         }
         sendPlayerList(room, socket.request.user);
         sendGameUpdate(room, socket.request.user);
     });
-
-
-
-
 
     // STANDARD REPLIES
     function sendGameUpdate(room, user) {
