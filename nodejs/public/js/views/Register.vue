@@ -1,7 +1,7 @@
 <template>
   <div class="div-main div-centered register">
     <div class="div-h-centered">
-      <h1>Register</h1>
+      <h1>Sign Up</h1>
       <p><input v-model="name" placeholder="Name" /></p>
       <p><input v-model="username" placeholder="Username" /></p>
       <p><input v-model="email" placeholder="Email" /></p>
