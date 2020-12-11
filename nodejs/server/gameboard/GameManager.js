@@ -118,7 +118,7 @@ module.exports = class GameManager {
 
     // captain picks player for the quest
     addPlayerToTeam(pick_id){
-        return this.game.add_player_to_team(pick_id);
+        return this.game.add_player_to_team(pick_id);;
     }
 
     // player approves or rejects the quest

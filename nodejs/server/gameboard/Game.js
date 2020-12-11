@@ -163,12 +163,12 @@ module.exports = class Game {
         if (this.number_of_team_players >= this.quest_team_sizes[this.quest_team_size_index]) {
             throw 'Maximum number of team players reached!';
         }
-
         let player = this.playerManager.getPlayer(pick_id);
-        player.on_team = true;
-        this.number_of_team_players++;
-        this.quests[this.quest_team_size_index].add_player_to_quest(player);
-
+        if (!player.on_team) {
+            player.on_team = true;
+            this.number_of_team_players++;
+            this.quests[this.quest_team_size_index].add_player_to_quest(player);
+        }
         return this.quest_team_sizes[this.quest_team_size_index] - this.number_of_team_players;
     }
 
