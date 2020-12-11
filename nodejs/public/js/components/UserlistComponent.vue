@@ -3,12 +3,21 @@
     <h2>Users</h2>
     <ul id="users">
       <li v-for="player in playerList" :key="player._id">
-        {{ player.username }} + {{player.gameReady}}
+        <div v-if="!player.gameReady">
+           {{ player.name }} <span>&#10006;</span>
+        </div>
+        <div v-if="player.gameReady">
+           {{ player.name }} <span>&#10004;</span>
+        </div>
       </li>
     </ul>
-    <p><button v-on:click="ready()">Ready</button></p>
-     <p><button v-on:click="start()">Start</button></p>
-  </div>
+     <p><button class="isActive" v-if="!myPlayer.gameReady" v-on:click="ready()">ready</button></p>
+    <p><button class="isInActive" v-if="myPlayer.gameReady" v-on:click="ready()">unready</button></p>
+
+    <div v-if="myPlayer.roomCreator">
+      <p><button v-on:click="start()">Start</button></p>
+    </div>
+      </div>
 </template>
 
 <script>
@@ -46,11 +55,24 @@ module.exports = {
     start: function () {
       this.$socket.emit("playerListStart", localStorage.getItem("gameCode"));
     },
+  },
+  computed: {
+    myPlayer: function () {
+      let foundPlayer = this.playerList.find(player => player._id === this.me._id);
+      console.log(JSON.stringify(foundPlayer));
+      return foundPlayer;
+    }
   }
  
 };
 </script>
 
 <style scoped>
+.isActive {
+  background-color: green;
+}
+.isInActive {
+  background-color: red;
+}
 </style>
       
