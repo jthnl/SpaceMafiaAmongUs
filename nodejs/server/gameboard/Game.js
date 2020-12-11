@@ -247,6 +247,11 @@ module.exports = class Game {
             this.current_quest.quest_result = SUCCESS_RESULT;
         }
 
+        // unset all players on_team
+        for (let i = 0; i < this.playerManager.getPlayerCount(); i++) {
+            this.playerManager.playerList[i].on_team = false;
+        }
+
         this.current_quest = this.quests[this.quest_team_size_index]; // Move on to next quest
         this.quest_in_progress = false;
     }
