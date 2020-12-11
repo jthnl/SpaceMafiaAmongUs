@@ -65,11 +65,11 @@ module.exports = class Game {
     init() {
         this.number_of_players = this.playerManager.getPlayerCount();
         if (this.number_of_players === undefined) {
-            throw 'Undefined number of players!'
+            console.log('Undefined number of players!');
         }
 
         if (this.number_of_players < MIN_NUMBER_OF_PLAYERS || this.number_of_players > MAX_NUMBER_OF_PLAYERS) {
-            throw 'Invalid number of players!';
+            console.log('Invalid number of players!');
         }
 
         switch (this.number_of_players) {
@@ -84,7 +84,7 @@ module.exports = class Game {
                 this.quest_team_sizes = QUEST_TEAM_SIZES_FOR_6;
                 break;
             default:
-                throw 'Invalid number of players!';
+                console.log('Invalid number of players!');
         }
 
         this.game_complete = false;
@@ -119,7 +119,7 @@ module.exports = class Game {
 
     // add_player(player) {
     //     if (this.players.length >= this.number_of_players) {
-    //         throw 'Maximum number of players reached!';
+    //         console.log('Maximum number of players reached!');
     //     }
 
     //     this.players.push(player);
@@ -161,7 +161,7 @@ module.exports = class Game {
 
     add_player_to_team(pick_id) {
         if (this.number_of_team_players >= this.quest_team_sizes[this.quest_team_size_index]) {
-            throw 'Maximum number of team players reached!';
+            console.log('Maximum number of team players reached!');
         }
         let player = this.playerManager.getPlayer(pick_id);
         if (!player.on_team) {
@@ -182,11 +182,11 @@ module.exports = class Game {
 
     vote_for_team(player, vote) {
         if (this.number_of_team_approval + this.number_of_team_refusal > this.number_of_players) {
-            throw 'Maximum number of team votes reached!';
+            console.log('Maximum number of team votes reached!');
         }
 
         if (player.team_voting_enabled == false) {
-            throw 'Player has already voted for team!';
+            console.log('Player has already voted for team!');
         }
 
         if (vote == true) {
@@ -298,7 +298,7 @@ class Quest {
 
     add_player_to_quest(player) {
         if (this.quest_players.length >= this.number_of_quest_players) {
-            throw 'Maximum number of quest players reached!';
+            console.log('Maximum number of quest players reached!');
         }
 
         this.quest_players.push(player);
@@ -312,11 +312,11 @@ class Quest {
 
     vote_for_quest(player, vote) {
         if (this.number_of_quest_succeses + this.number_of_quest_fails > this.number_of_quest_players) {
-            throw 'Maximum number of quest votes reached!';
+            console.log('Maximum number of quest votes reached!');
         }
 
         if (player.quest_voting_enabled == false) {
-            throw 'Player has already voted for quest or is not part of the quest!';
+            console.log('Player has already voted for quest or is not part of the quest!');
         }
 
         if (vote == true) {
