@@ -93,7 +93,14 @@ module.exports = {
       this.messageInput = "";
     },
     uidtousername: function (value) {
+      // check if message is from server or admin
       if (!value) return "null id";
+      if(value === 1){
+        return "Server";
+      }
+      if(value === 2){
+        return "Admin"
+      }
       let usr = this.playerList.find((user) => {
         return user._id === value;
       });
