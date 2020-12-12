@@ -69,10 +69,10 @@ module.exports = {
 
 <style scoped>
 .isActive {
-  background-color: green;
+  background-color: #16CA76;
 }
 .isInActive {
-  background-color: red;
+  background-color: #e06666;
 }
 </style>
       
