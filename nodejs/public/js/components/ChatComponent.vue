@@ -1,6 +1,6 @@
 <template>
   <div class="grid-item-messages-component grid-container-messages-component">
-    <div class="grid-item-messages">
+    <div id="msglist-container" class="grid-item-messages">
       <ul id="messages">
         <div v-for="message in messageList" :key="message._mid">
           <div v-if="message._id === myPlayer._id">
@@ -59,6 +59,7 @@ module.exports = {
       messageList: [],
       playerList: [],
       messageInput: "",
+      autoScroll: false,
     };
   },
   created: function () {
@@ -69,6 +70,17 @@ module.exports = {
     this.sockets.subscribe("messageUpdate", (data) => {
       this.messageList = data.messageList;
       this.playerList = data.playerList;
+
+      // Determine whether or not the list of messages will scroll down automatically
+      // Only scroll down when the user is at the very bottom of the list of messages
+      let messageBlock = this.$el.querySelector("#msglist-container");
+
+      if (
+        messageBlock.scrollTop + messageBlock.clientHeight >=
+        messageBlock.scrollHeight
+      ) {
+        this.autoScroll = true;
+      }
     });
   },
   methods: {
@@ -90,6 +102,14 @@ module.exports = {
       }
       return "[Unknown User]";
     },
+  },
+  updated: function () {
+    let messageBlock = this.$el.querySelector("#msglist-container");
+
+    if (this.autoScroll) {
+      messageBlock.scrollTop = messageBlock.scrollHeight;
+      this.autoScroll = false;
+    }
   },
   computed: {
     myPlayer: function () {
