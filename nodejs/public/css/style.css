@@ -129,20 +129,28 @@ button:hover {
     padding: 2em;
 }
 
-.grid-item-messages {
+.grid-item-messages-component {
     border-right: white 1px solid;
     border-top: white 1px solid;
     grid-column: 2 / span 4;
     grid-row: 2 / span 9;
+}
+
+.grid-container-messages-component {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+}
+
+.grid-item-messages {
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 8;
     overflow-y: auto;
     padding: 2em;
 }
 
 .grid-item-form {
-    border-right: white 1px solid;
-    border-top: white 1px solid;
-    grid-column: 2 / span 4;
-    grid-row: 10 / span 1;
+    grid-column: 1 / span 1;
     padding: 2em;
 }
 
@@ -190,4 +198,35 @@ button:hover {
 #users {
     list-style-type: none;
     padding: 0;
+}
+
+
+/* Custom Scrollbar */
+
+
+/* width */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+
+/* Track */
+
+::-webkit-scrollbar-track {
+    background: #262626;
+}
+
+
+/* Handle */
+
+::-webkit-scrollbar-thumb {
+    background: white;
+}
+
+
+/* Handle on hover */
+
+::-webkit-scrollbar-thumb:hover {
+    background: white;
 }

@@ -1,33 +1,34 @@
 <template>
-  <div class="grid-item-messages">
-    <h2>Messages</h2>
-    <ul id="messages">
-      <div v-for="message in messageList" :key="message._mid">
-        <div v-if="message._id === myPlayer._id">
-          <li class="message-main-user">
-            <p>
-              {{ uidtousername(message._id) }} (You)
-              <span class="timestamp">{{ message.timestamp | timestamptodate }}</span>
-            </p>
-            <p class="message-text message-text-main-user">
-              {{ message.message }}
-            </p>
-          </li>
+  <div class="grid-item-messages-component grid-container-messages-component">
+    <div class="grid-item-messages">
+      <ul id="messages">
+        <div v-for="message in messageList" :key="message._mid">
+          <div v-if="message._id === myPlayer._id">
+            <li class="message-main-user">
+              <p>
+                {{ uidtousername(message._id) }} (You)
+                <span class="timestamp">{{ message.timestamp | timestamptodate }}</span>
+              </p>
+              <p class="message-text message-text-main-user">
+                {{ message.message }}
+              </p>
+            </li>
+          </div>
+          <div v-else>
+            <li>
+              <p>
+                {{ uidtousername(message._id) }}
+                <span class="timestamp">{{ message.timestamp | timestamptodate }}</span>
+              </p>
+              <p class="message-text">
+                {{ message.message }}
+              </p>
+            </li>
+          </div>
         </div>
-        <div v-else>
-          <li>
-            <p>
-              {{ uidtousername(message._id) }}
-              <span class="timestamp">{{ message.timestamp | timestamptodate }}</span>
-            </p>
-            <p class="message-text">
-              {{ message.message }}
-            </p>
-          </li>
-        </div>
-      </div>
-    </ul>
-    <div class="force-bottom div-centered">
+      </ul>
+    </div>
+    <div class="grid-item-form div-centered">
       <form id="message-form" @submit.prevent="sendMessage">
         <input
           id="message"
@@ -123,15 +124,4 @@ module.exports = {
 };
 </script>
 
-<style scoped>
-.grid-item-messages {
-  position: relative;
-}
-
-.force-bottom {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-}
-</style>
+<style scoped></style>
