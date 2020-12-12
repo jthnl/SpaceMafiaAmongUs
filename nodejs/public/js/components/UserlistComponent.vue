@@ -3,18 +3,18 @@
     <h2>Users</h2>
     <ul id="users">
       <li v-for="player in playerList" :key="player._id">
-        <div v-if="!player.gameReady">
-           {{ player.name }} <span>&#10006;</span>
+        <div v-if="!player.gameReady"> 
+           <span v-if="player.is_captain">&#128081;</span>{{ player.name }}<span>&#10006;</span>
         </div>
         <div v-if="player.gameReady">
-           {{ player.name }} <span>&#10004;</span>
+          <span v-if="player.is_captain">&#128081;</span>{{ player.name }} <span>&#10004;</span>
         </div>
       </li>
     </ul>
-     <p><button class="isActive" v-if="!myPlayer.gameReady" v-on:click="ready()">ready</button></p>
-    <p><button class="isInActive" v-if="myPlayer.gameReady" v-on:click="ready()">unready</button></p>
+     <p><button class="isActive" v-if="!myPlayer.gameReady && gameState === 0 && !myPlayer.roomCreator" v-on:click="ready()">ready</button></p>
+    <p><button class="isInActive" v-if="myPlayer.gameReady && gameState === 0 && !myPlayer.roomCreator" v-on:click="ready()">unready</button></p>
 
-    <div v-if="myPlayer.roomCreator">
+    <div v-if="myPlayer.roomCreator && gameState === 0">
       <p><button v-on:click="start()">Start</button></p>
     </div>
       </div>
@@ -29,6 +29,7 @@ module.exports = {
     this.$socket.emit("whoAmI");
     console.log(localStorage.getItem("gameCode"));
     this.$socket.emit("playerListInit", localStorage.getItem("gameCode"));
+
   },
   data: function () {
     return {
@@ -54,13 +55,22 @@ module.exports = {
     },
     start: function () {
       this.$socket.emit("playerListStart", localStorage.getItem("gameCode"));
-    },
+    }
   },
   computed: {
     myPlayer: function () {
       let foundPlayer = this.playerList.find(player => player._id === this.me._id);
       console.log(JSON.stringify(foundPlayer));
       return foundPlayer;
+    },
+    checkPList: function () {
+      let numReady = 0;
+      for(i = 0; i < playerList.length; i++){
+        if (playerList[i].gameReady === true) {
+          numReady++;
+        }
+      }
+      return numReady;
     }
   }
  
