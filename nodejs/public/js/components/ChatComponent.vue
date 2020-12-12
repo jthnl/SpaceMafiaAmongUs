@@ -2,9 +2,24 @@
   <div class="grid-item-messages">
     <h2>Messages</h2>
     <ul id="messages">
-      <li v-for="message in messageList" :key="message._mid">
-        {{uidtousername(message._id)}} + {{ message.timestamp | timestamptodate }} + {{ message.message }} 
-      </li>
+      <div v-for="message in messageList" :key="message._mid">
+        <div v-if="message._id === myPlayer._id">
+          <li class="message-main-user">
+            <p class="message-text message-text-main-user">
+              {{ uidtousername(message._id) }} + {{ message.timestamp | timestamptodate }} +
+              {{ message.message }}
+            </p>
+          </li>
+        </div>
+        <div v-else>
+          <li>
+            <p class="message-text">
+              {{ uidtousername(message._id) }} + {{ message.timestamp | timestamptodate }} +
+              {{ message.message }}
+            </p>
+          </li>
+        </div>
+      </div>
     </ul>
     <div class="force-bottom div-centered">
       <form id="message-form" @submit.prevent="sendMessage">
@@ -25,10 +40,12 @@ module.exports = {
   mounted() {
     //this.$socket.open();
     console.log("Chat component added");
+    this.$socket.emit("whoAmI");
     this.$socket.emit("chatComponentInit", localStorage.getItem("gameCode"));
   },
   data: function () {
     return {
+      me: [],
       messageList: [],
       playerList: [],
       messageInput: "",
@@ -36,6 +53,9 @@ module.exports = {
   },
   created: function () {
     //    SOCKET IO LISTENERS
+    this.sockets.subscribe("accountUserInfo", (data) => {
+        this.me = data;
+    });
     this.sockets.subscribe("messageUpdate", (data) => {
       this.messageList = data.messageList;
       this.playerList = data.playerList;
@@ -61,6 +81,13 @@ module.exports = {
       return "[Unknown User]";
     },
   },
+  computed: {
+    myPlayer: function () {
+      let foundPlayer = this.playerList.find(player => player._id === this.me._id);
+      console.log(JSON.stringify(foundPlayer));
+      return foundPlayer;
+    }
+  },
   filters: {
     timestamptodate: function (value) {
       if (!value) return "null date";
@@ -73,7 +100,6 @@ module.exports = {
   },
 };
 </script>
-
 
 <style scoped>
 .grid-item-messages {
