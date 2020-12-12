@@ -5,6 +5,7 @@ var Register = httpVueLoader('js/views/Register.vue');
 var Account = httpVueLoader('js/views/Account.vue');
 var Lobby = httpVueLoader('js/views/Lobby.vue');
 var Room = httpVueLoader('js/views/Room.vue');
+var Admin = httpVueLoader('js/views/Admin.vue');
 
 var routes = [{
         path: '/',
@@ -30,6 +31,11 @@ var routes = [{
         path: '/room',
         name: 'room',
         component: Room
+    },
+    {
+        path: '/admin',
+        name: 'admin',
+        component: Admin
     }
 ];
 
