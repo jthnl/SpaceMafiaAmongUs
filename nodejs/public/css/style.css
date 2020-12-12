@@ -230,3 +230,23 @@ button:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: white;
 }
+
+
+@media screen and (max-width: 768px) {
+    .grid-container{
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+     }
+
+    .grid-container-messages-component {
+        max-height: 40vh;
+     }
+    
+    .grid-item-account,.grid-item-messages-component,.grid-item-users,.grid-item-info,.grid-item-title,.grid-item-page, .grid-item-instructions{
+      grid-column: auto;
+      grid-row: auto;
+    }
+    h1{
+        font-size: 1.5em;
+    }
+  }
