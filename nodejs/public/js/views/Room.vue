@@ -33,8 +33,15 @@ module.exports = {
   data: function () {
     return {
       me: [],
-      gameCode: ""
+      gameCode: "",
     };
+  },
+  created: function () {
+    // alerts player when they are kicked out of the room by Admin
+    this.sockets.subscribe("kickOut", (data) => {
+      this.$router.push({ name: "account" });
+      window.alert(data.message);
+    });
   },
 };
 </script>

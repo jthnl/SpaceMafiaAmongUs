@@ -28,6 +28,8 @@
         </p>
         <p><button v-on:click="joinGame()">Join Game</button></p>
         <p><button v-on:click="createGame()">Create Game</button></p>
+        <!-- special option for admins only -->
+        <p><button v-if="me.admin" v-on:click="admin()">Admin</button></p>
       </div>
     </div>
     <div class="grid-item-instructions">
@@ -83,5 +85,8 @@ module.exports = {
     createGame: function () {
       this.$socket.emit("createGame");
     },
+    admin: function() {
+      this.$router.push({ name: "admin" });
+    }
   },
 };
