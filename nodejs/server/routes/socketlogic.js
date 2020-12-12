@@ -26,7 +26,8 @@ module.exports = function (io, socket, db) {
             "_id": socket.request.user._id,
             "username": socket.request.user.username,
             "email": socket.request.user.email,
-            "name": socket.request.user.name
+            "name": socket.request.user.name,
+            "admin": socket.request.user.admin
         }
         stats = {
             "gamesplayed": socket.request.user.gamesplayed,
@@ -243,7 +244,7 @@ module.exports = function (io, socket, db) {
         }
     });
 
-    
+
     // set new game when old game ends
     socket.on('newGame', (gameCode) => {
         console.log("newGame.");
@@ -261,15 +262,15 @@ module.exports = function (io, socket, db) {
         let winner = room.gameManager.getWinner();
         let players = room.playerManager.playerList;
         for (let i = 0; i < players.length; i++) {
-            let query = { _id: players[i]._id};
+            let query = { _id: players[i]._id };
             let change = {};
             if (JSON.stringify(players[i].role) === JSON.stringify(winner)) {
-                change = { $inc: { wins: 1 , gamesplayed: 1} };
+                change = { $inc: { wins: 1, gamesplayed: 1 } };
             } else {
-                change = { $inc: { losses: 1 , gamesplayed: 1} };
+                change = { $inc: { losses: 1, gamesplayed: 1 } };
             }
-            db.updateOne(query, change, function(err, res) {
-                if(err){
+            db.updateOne(query, change, function (err, res) {
+                if (err) {
                     console.log("unable to update statistics");
                 }
             });
@@ -286,6 +287,61 @@ module.exports = function (io, socket, db) {
             gameWinner: room.gameManager.getWinner()
         });
     }
+
+    // ********************************************************************** //
+    // ***** ADMIN PAGE ***************************************************** //
+    // ********************************************************************** //
+
+    // initialize admin view when user enters Admin page
+    socket.on('adminInit', () => {
+        console.log("AdminInit:");
+        if (socket.request.user.admin) {
+            sendAdminUpdate();
+        }
+    });
+
+    // delete room and kick all members out
+    socket.on('deleteRoom', (gameCode) => {
+        console.log("DeleteRoom");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        // send notification through the room's chat
+        room.chatManager.newAdminMessage("room kicked by admin");
+        sendChatComponent(room);
+        // send socket notification to room
+        io.in(room.roomCode).emit('kickOut', {
+            message: "room deleted by admin"
+        });
+        // kick all users out of the socket IO room
+        io.of('/').in('room name').clients(function(error, clients) {
+            if (clients.length > 0) {
+                console.log('clients in the room: \n');
+                console.log(clients);
+                clients.forEach(function (socket_id) {
+                    io.sockets.sockets[socket_id].leave('room name');
+                });
+            }
+        });
+        //delete room from collection
+        roomCollection = roomCollection.filter( room => room.roomCode !== gameCode);
+        // update Admin view
+        sendAdminUpdate();
+    });
+
+    // sends a message to the room as admin member
+    socket.on('sendAdminMessage', (gameCode, data) => {
+        console.log("sendAdminMessage");
+        let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        room.chatManager.newAdminMessage(data);
+        sendChatComponent(room);
+        sendAdminUpdate();
+    });
+
+    // standardized game-component reply
+    function sendAdminUpdate() {
+        console.log("sendAdminUpdate: ");
+        socket.emit('adminUpdate', roomCollection);
+    }
+
 
 };
 
