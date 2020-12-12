@@ -5,16 +5,22 @@
       <div v-for="message in messageList" :key="message._mid">
         <div v-if="message._id === myPlayer._id">
           <li class="message-main-user">
+            <p>
+              {{ uidtousername(message._id) }} (You)
+              <span class="timestamp">{{ message.timestamp | timestamptodate }}</span>
+            </p>
             <p class="message-text message-text-main-user">
-              {{ uidtousername(message._id) }} + {{ message.timestamp | timestamptodate }} +
               {{ message.message }}
             </p>
           </li>
         </div>
         <div v-else>
           <li>
+            <p>
+              {{ uidtousername(message._id) }}
+              <span class="timestamp">{{ message.timestamp | timestamptodate }}</span>
+            </p>
             <p class="message-text">
-              {{ uidtousername(message._id) }} + {{ message.timestamp | timestamptodate }} +
               {{ message.message }}
             </p>
           </li>
@@ -35,6 +41,9 @@
 </template>
 
 <script>
+// This is for converting timestamp differences from milliseconds to hours
+const NUMBER_OF_MILLISECONDS_IN_AN_HOUR = 1000 * 60 * 60;
+
 module.exports = {
   name: "chatcomponent",
   mounted() {
@@ -54,7 +63,7 @@ module.exports = {
   created: function () {
     //    SOCKET IO LISTENERS
     this.sockets.subscribe("accountUserInfo", (data) => {
-        this.me = data;
+      this.me = data;
     });
     this.sockets.subscribe("messageUpdate", (data) => {
       this.messageList = data.messageList;
@@ -83,19 +92,32 @@ module.exports = {
   },
   computed: {
     myPlayer: function () {
-      let foundPlayer = this.playerList.find(player => player._id === this.me._id);
+      let foundPlayer = this.playerList.find((player) => player._id === this.me._id);
       console.log(JSON.stringify(foundPlayer));
       return foundPlayer;
-    }
+    },
   },
   filters: {
     timestamptodate: function (value) {
       if (!value) return "null date";
       let timestamp = new Date(value);
-      let hrs = timestamp.getHours();
-      let mins = "0" + timestamp.getMinutes();
-      let secs = "0" + timestamp.getSeconds();
-      return "" + hrs + ":" + mins.substr(-2) + ":" + secs.substr(-2);
+
+      let difference_in_hours =
+        Math.abs(new Date() - timestamp) / NUMBER_OF_MILLISECONDS_IN_AN_HOUR;
+
+      // If message timestamp is less than a day old, display time only, otherwise, display date only
+      if (difference_in_hours < 24) {
+        return timestamp.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "numeric",
+        });
+      } else {
+        return timestamp.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+        });
+      }
     },
   },
 };

@@ -169,6 +169,12 @@ button:hover {
     background-color: #1982FC;
 }
 
+.timestamp {
+    color: #808080;
+    font-size: 0.8em;
+    padding-left: 1em;
+}
+
 .login {}
 
 .lobby {}
