@@ -58,7 +58,8 @@ module.exports = function (app, db) {
             "name": req.body.name,
             "gamesplayed": 0,
             "wins": 0,
-            "losses": 0
+            "losses": 0,
+            "admin":false,
         };
 
         let query = {
