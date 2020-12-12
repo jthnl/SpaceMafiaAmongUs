@@ -6,7 +6,7 @@
         <input v-on:keyup.enter="sendLogin()" v-model="username" placeholder="Username" />
       </p>
       <p>
-        <input v-on:keyup.enter="sendLogin()" v-model="password" placeholder="Password" />
+        <input v-on:keyup.enter="sendLogin()" type="password" v-model="password" placeholder="Password" />
       </p>
       <p><button v-on:click="sendLogin()">Log In</button></p>
       <p><router-link to="/register" tag="button">Sign Up</router-link></p>

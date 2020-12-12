@@ -5,7 +5,7 @@
       <p><input v-model="name" placeholder="Name" /></p>
       <p><input v-model="username" placeholder="Username" /></p>
       <p><input v-model="email" placeholder="Email" /></p>
-      <p><input v-model="password" placeholder="Password" /></p>
+      <p><input v-model="password" type="password" placeholder="Password" /></p>
       <p><button v-on:click="sendRegister()">Sign up</button></p>
       <p><router-link to="/" tag="button">Cancel</router-link></p>
       <p>{{ errMessage }}</p>
