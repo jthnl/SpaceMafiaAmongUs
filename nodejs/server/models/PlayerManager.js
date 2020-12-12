@@ -33,6 +33,11 @@ module.exports = class PlayerManager {
 
     playersReady(){
         let players = this.playerList.filter(user => user.roomCreator !== true);
+        // not enough players
+        if(players.length < 5){
+            return false;
+        }
+        // else, check if everyone else is ready
         let allReady = true;
         for(let i = 0; i < players.length; i++){
             if(players[i].gameReady === false){
