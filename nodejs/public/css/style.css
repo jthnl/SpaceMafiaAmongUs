@@ -24,11 +24,6 @@ a {
     text-decoration: none;
 }
 
-a:hover {
-    color: white;
-    text-decoration: none;
-}
-
 form {
     /* padding: 0 4em; */
     width: 100%;

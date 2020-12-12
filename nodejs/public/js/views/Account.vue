@@ -2,7 +2,7 @@
   <div class="grid-container account">
     <div class="grid-item-title div-centered">
       <div id="title">
-        <h1><router-link to="/">Space Mafia Among Us</router-link></h1>
+        <h1>Space Mafia Among Us</h1>
       </div>
     </div>
     <div class="grid-item-page div-centered">

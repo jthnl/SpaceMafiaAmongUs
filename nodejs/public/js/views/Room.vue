@@ -2,7 +2,7 @@
   <div class="room">
     <div class="grid-container app-world">
       <div class="grid-item-title div-centered">
-        <h1><router-link to="/">Space Mafia Among Us</router-link></h1>
+        <h1>Space Mafia Among Us</h1>
       </div>
       <div class="grid-item-page div-centered">
         <h2>Room: {{ this.gameCode }}</h2>
