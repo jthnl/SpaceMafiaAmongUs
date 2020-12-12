@@ -2,8 +2,12 @@
   <div class="div-main div-centered login">
     <div class="div-h-centered">
       <h1>Log In</h1>
-      <p><input v-model="username" placeholder="Username" /></p>
-      <p><input v-model="password" placeholder="Password" /></p>
+      <p>
+        <input v-on:keyup.enter="sendLogin()" v-model="username" placeholder="Username" />
+      </p>
+      <p>
+        <input v-on:keyup.enter="sendLogin()" v-model="password" placeholder="Password" />
+      </p>
       <p><button v-on:click="sendLogin()">Log In</button></p>
       <p><router-link to="/register" tag="button">Sign Up</router-link></p>
       <!-- <p>{{ errMessage }}</p> -->
