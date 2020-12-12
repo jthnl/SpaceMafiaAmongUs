@@ -32,7 +32,7 @@ module.exports = class PlayerManager {
     }
 
     playersReady(){
-        let players = this.playerList.filter(user => user.roomCreator !== true);
+        let players = this.playerList;
         // not enough players
         if(players.length < 5){
             return false;

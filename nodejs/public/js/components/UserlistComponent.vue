@@ -11,12 +11,17 @@
         </div>
       </li>
     </ul>
-     <p><button class="isActive" v-if="!myPlayer.gameReady" v-on:click="ready()">Ready</button></p>
-    <p><button class="isInActive" v-if="myPlayer.gameReady" v-on:click="ready()">Unready</button></p>
+     <p><button class="isActive" v-if="!myPlayer.gameReady && gameState === 0" v-on:click="ready()">Ready</button></p>
+    <p><button class="isInActive" v-if="myPlayer.gameReady && gameState === 0" v-on:click="ready()">Unready</button></p>
 
-    <div v-if="myPlayer.roomCreator">
+    <div v-if="myPlayer.roomCreator && gameState === 0">
       <p><button v-on:click="start()">Start</button></p>
     </div>
+
+    <div v-if="gameState !== 0">
+      <span>Your role: {{ myPlayer.role }}</span>
+    </div>
+
       </div>
 </template>
 
@@ -61,6 +66,16 @@ module.exports = {
       let foundPlayer = this.playerList.find(player => player._id === this.me._id);
       console.log(JSON.stringify(foundPlayer));
       return foundPlayer;
+    },
+    allReady: function () {
+      return true;
+      let totalReady = 0;
+      for(let i = 0; i < playerList.length; i++) {
+        if(playerList[i].gameReady) {
+          totalReady++;
+        }
+      }
+      return(totalReady === playerList.length);
     }
   }
  
