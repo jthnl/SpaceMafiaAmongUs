@@ -11,11 +11,11 @@
         </div>
 
         
-        <p><button v-on:click="approve()">approve</button></p>
-        <p><button v-on:click="reject()">reject</button></p>
-        <p><button v-on:click="success()">success</button></p>
-        <p><button v-on:click="fail()">fail</button></p>
-        <p><button v-on:click="newGame()">new game</button></p>
+        <p><button v-on:click="approve()">Approve</button></p>
+        <p><button v-on:click="reject()">Reject</button></p>
+        <p><button v-on:click="success()">Success</button></p>
+        <p><button v-on:click="fail()">Fail</button></p>
+        <p><button v-on:click="newGame()">New Game</button></p>
     </div>
     
 </template>

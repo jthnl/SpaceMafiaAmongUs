@@ -11,8 +11,8 @@
         </div>
       </li>
     </ul>
-     <p><button class="isActive" v-if="!myPlayer.gameReady" v-on:click="ready()">ready</button></p>
-    <p><button class="isInActive" v-if="myPlayer.gameReady" v-on:click="ready()">unready</button></p>
+     <p><button class="isActive" v-if="!myPlayer.gameReady" v-on:click="ready()">Ready</button></p>
+    <p><button class="isInActive" v-if="myPlayer.gameReady" v-on:click="ready()">Unready</button></p>
 
     <div v-if="myPlayer.roomCreator">
       <p><button v-on:click="start()">Start</button></p>
