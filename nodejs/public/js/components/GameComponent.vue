@@ -44,7 +44,7 @@
         </div>
 
         <div v-if="gameState === 4">
-          <p> {{ this.gameWinner }} wins!</p>
+          <p> {{ this.gameWinner }}S win!</p>
         </div>
         <div v-if="gameState === 4 && !myPlayer.roomCreator">
           <p>Waiting for room host to start a new game.</p>
@@ -56,7 +56,9 @@
       <div class="grid-item-rounds">
         <h2>Rounds</h2>
         <div v-for="quest in gameHistory.questHistory" :key="quest">
-          <p v-if="quest.quest_result !== null">QUEST #{{quest.quest_round}}  Result: {{quest.quest_result}}</p>
+          <span v-if="quest.quest_result === 'SUCCESS'">&#128311; </span>
+          <span v-if="quest.quest_result === 'FAIL'">&#128310; </span>
+          <span v-if="quest.quest_result !== null">QUEST #{{quest.quest_round+1}}  - Result: {{quest.quest_result}}  - Vote: &#128313;: {{ quest.number_of_quest_succeses }} &#128312;: {{ quest.number_of_quest_fails }}</span>
       </div>
     </div>
 

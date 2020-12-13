@@ -5,7 +5,7 @@
       <li v-for="player in playerList" :key="player._id">
         <div>
            <span v-if="player.is_captain && gameState === 1">&#128081;</span>
-           <span v-if="player.on_team && (gameState === 2 || gameState === 3)">&#128312;</span>
+           <span class="teamMember" v-if="player.on_team && (gameState === 2 || gameState === 3)">&#128160;</span>
            {{ player.name }}
            <span v-if="player._id === myPlayer._id">(You)</span>
            <span v-if="!player.gameReady">&#10006;</span>
@@ -21,7 +21,18 @@
     </div>
 
     <div v-if="gameState !== 0">
-      <span>Your role: {{ myPlayer.role }}</span>
+      <div>Your role:</div>
+      <span v-if="myPlayer.role === 'INNOCENT'"> &#128311;</span>
+      <span v-if="myPlayer.role === 'TRAITOR'"> &#128310;</span>
+      <span> {{ myPlayer.role }}</span>
+      <div v-if="myPlayer.role === 'TRAITOR'">
+        <p>You are working together with the other traitor:</p>
+        <div v-for="player in playerList" :key="player.id">
+          <div v-if="player.role === 'TRAITOR' && myPlayer._id !== player._id">
+            <span>&#128312; {{ player.name }}</span>
+          </div>
+        </div>
+      </div>
     </div>
 
       </div>
@@ -90,6 +101,9 @@ module.exports = {
 }
 .isInActive {
   background-color: #e06666;
+}
+.teamMember {
+  font-size: 70%;
 }
 </style>
       
