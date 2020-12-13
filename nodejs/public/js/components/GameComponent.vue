@@ -55,6 +55,8 @@
       </div>
       <div class="grid-item-rounds">
         <h2>Rounds</h2>
+        <div v-for="quest in gameHistory.questHistory" :key="quest">
+          <p v-if="quest.quest_result !== null">QUEST #{{quest.quest_round}}  Result: {{quest.quest_result}}</p>
       </div>
     </div>
 
