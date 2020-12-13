@@ -12,6 +12,7 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const passport = require('passport');
+const MongoClient = require('mongodb').MongoClient;
 
 const port = process.env.PORT_NODE;
 
@@ -36,12 +37,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // initialize autosave functionality
-saveroom.readsave(socketdataSet, dbs);  // set up all rooms from database
-saveroom.autosave(socketdataGet, dbs);  // save room states at specified interval
+MongoClient.connect(process.env.DB_URI, function(err, db){
+    if (err) throw err;
+    let dbSM = db.db(process.env.DB_NAME);
+    let dbs = dbSM.collection(process.env.DB_ROOM);
+    saveroom.readsave(socketdataSet, dbs);  // set up all rooms from database
+    saveroom.autosave(socketdataGet, dbs);  // save room states at specified interval
+});
 
 db(async (client) => {
     const dbm = await client.db(process.env.DB_NAME).collection(process.env.DB_USER);
-    const dbs = await client.db(process.env.DB_NAME).collection(process.env.DB_ROOM);
 
     // run modules 
     cookiesetup(app, io, dbm, passport);         // setup Cookies for Passport and SocketIO

@@ -10,12 +10,24 @@ const Player = require('../models/Player');
 
 // run autosave - run updateDatabase every AUTO_SAVE_INTERVAL seconds
 exports.autosave = function autosave(socketdata, dbs) {
-    console.log("Starting autosave functionality");
-    console.log("Will save every: " + process.env.AUTO_SAVE_INTERVAL + " seconds");
-    // autosave every AUTO_SAVE_INTERVAL seconds
-    setInterval(function () {
-        updateDatabase(socketdata(), dbs)
-    }, process.env.AUTO_SAVE_INTERVAL);
+    if (process.env.AUTO_SAVE_ENABLED) {
+        autoSaveConsoleMessage();
+        // autosave every AUTO_SAVE_INTERVAL seconds
+        setInterval(function () {
+            localLog("autosave");
+            updateDatabase(socketdata(), dbs)
+        }, process.env.AUTO_SAVE_INTERVAL);
+    }
+}
+
+function autoSaveConsoleMessage(){
+    localLog("============================================================");
+    localLog("             STARTING AUTOSAVE FUNCTIONALITY                ");
+    localLog(" program will save roomCollection every " + process.env.AUTO_SAVE_INTERVAL + " ms");
+    localLog(" change functionality in ./server/globalvar.env:            ");
+    localLog(" AUTO_SAVE_ENABLED: enable/disable autosave                 ");
+    localLog(" AUTO_SAVE_LOGGING: enable/disable logging                  ");
+    localLog("============================================================");
 }
 
 /**
@@ -23,19 +35,21 @@ exports.autosave = function autosave(socketdata, dbs) {
  * The object from the database will have to be deserialized.
  */
 exports.readsave = function readsave(dataSet, dbs) {
-    console.log("Loading games from database");
-    // find room collection with current date
-    dbs.findOne({ date: getDateNoTime() }, function (err, result) {
-        if (err) {
-            // mongo error
-            console.log("Unable to load rooms from database:" + err);
-        }
-        if (result !== null) {
-            dataSet(deserializeObjectToArray(result));
-        } else {
-            console.log("no rooms in database");
-        }
-    });
+    if (process.env.AUTO_SAVE_ENABLED) {
+        localLog("Loading games from database");
+        // find room collection with current date
+        dbs.findOne({ date: getDateNoTime() }, function (err, result) {
+            if (err) {
+                // mongo error
+                localLog("Unable to load rooms from database:" + err);
+            }
+            if (result !== null) {
+                dataSet(deserializeObjectToArray(result));
+            } else {
+                localLog("no rooms in database");
+            }
+        });
+    }
 }
 
 /**
@@ -82,9 +96,9 @@ function updateDatabase(socketdata, dbs) {
     if (socketdata.length > 0) {
         dbs.updateOne({ date: getDateNoTime() }, { $set: { socketData: socketdata } }, { upsert: true }, (err, doc) => {
             if (err) {
-                console.log("autosaving not working" + err);
+                localLog("autosaving not working" + err);
             } else {
-                console.log("autosave");
+                localLog("autosave");
             }
         });
     }
@@ -95,4 +109,10 @@ function getDateNoTime() {
     var date = new Date();
     date.setHours(0, 0, 0, 0);
     return date;
+}
+
+function localLog(data){
+    if(process.env.AUTO_SAVE_LOGGING){
+        console.log(data);
+    }
 }
