@@ -20,7 +20,11 @@ const db = require('./server/database/mongoconn');                  // connectio
 const routes = require('./server/config/httpsetup');                // HTTP routes
 const cookiesetup = require('./server/config/cookiesetup');         // setup cookies for Passport and SocketIO
 const passportsetup = require('./server/config/passportsetup');     // setup Passport
-const socketlogic = require('./server/routes/socketlogic');         // SocketIO Setup
+const socketlogicmodule = require('./server/routes/socketlogic');         // SocketIO Setup
+const saveroom = require('./server/database/saveroom');
+const socketlogic = socketlogicmodule.socketapp;
+const socketdataGet = socketlogicmodule.dataGet;
+const socketdataSet = socketlogicmodule.dataSet;
 
 // set express middlewear
 app.use(express.static("public"));
@@ -31,14 +35,18 @@ app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// initialize autosave functionality
+saveroom.readsave(socketdataSet, dbs);  // set up all rooms from database
+saveroom.autosave(socketdataGet, dbs);  // save room states at specified interval
+
 db(async (client) => {
     const dbm = await client.db(process.env.DB_NAME).collection(process.env.DB_USER);
+    const dbs = await client.db(process.env.DB_NAME).collection(process.env.DB_ROOM);
 
     // run modules 
     cookiesetup(app, io, dbm, passport);         // setup Cookies for Passport and SocketIO
     passportsetup(app, dbm, passport);           // setup Passport
-    routes(app, dbm);                            // HTTP routes
-
+    routes(app, dbm);
     io.on('connection', (socket) => {            // SocketIO Setup. Needs authentication
         socketlogic(io, socket, dbm);
     });
