@@ -5,6 +5,7 @@
       <li v-for="player in playerList" :key="player._id">
         <div>
            <span v-if="player.is_captain && gameState === 1">&#128081;</span>
+           <span v-if="player.on_team && (gameState === 2 || gameState === 3)">&#128312;</span>
            {{ player.name }}
            <span v-if="player._id === myPlayer._id">(You)</span>
            <span v-if="!player.gameReady">&#10006;</span>

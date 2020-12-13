@@ -8,22 +8,22 @@
 
         <div v-for="player in playerList" :key="player._id">
           <div v-if="gameState === 1 && myPlayer.is_captain">
-            <p><button v-on:click="pick(player._id)">{{player.username}}</button></p>
+            <p v-if="!player.on_team"><button v-on:click="pick(player._id)">{{player.username}}</button></p>
           </div>
         </div>
 
-        <div v-if="gameState === 2">
-          <p><button v-on:click="approve()">approve</button></p>
-          <p><button v-on:click="reject()">reject</button></p>
+        <div v-if="gameState === 2 && myPlayer.team_voting_enabled">
+          <p><button v-on:click="approve()">Approve</button></p>
+          <p><button v-on:click="reject()">Reject</button></p>
         </div>
 
-        <div v-if="gameState === 3 && myPlayer.on_team">
-          <p><button v-on:click="success()">success</button></p>
-          <p><button v-on:click="fail()">fail</button></p>
+        <div v-if="gameState === 3 && myPlayer.on_team && myPlayer.quest_voting_enabled">
+          <p><button v-on:click="success()">Success</button></p>
+          <p><button v-on:click="fail()">Fail</button></p>
         </div>
 
-        <div v-if="gameState === 4">
-          <p><button v-on:click="newGame()">new game</button></p>
+        <div v-if="gameState === 4 && myPlayer.roomCreator">
+          <p><button v-on:click="newGame()">New Game</button></p>
         </div>
 
     </div>

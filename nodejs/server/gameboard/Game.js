@@ -130,6 +130,9 @@ module.exports = class Game {
         let number_of_traitor_roles_assigned = 0;
 
         for (let i = 0; i < this.playerManager.getPlayerCount(); i++) {
+            // Reset captain role for everyone in case this is a new game
+            this.playerManager.playerList[i].is_captain = false;
+
             // If there are no more traitor roles to assign, assign innocent role
             if (number_of_traitor_roles_assigned >= this.number_of_traitor_players) {
                 this.playerManager.playerList[i].role = INNOCENT_ROLE;
@@ -143,7 +146,7 @@ module.exports = class Game {
             }
 
             // If randomly generated number is in range [0, 0.5), assign innocent role
-            if (Math.random() < 0.5) {
+            if (Math.random() < (this.number_of_innocent_players / (this.number_of_innocent_players+this.number_of_traitor_players))) {
                 this.playerManager.playerList[i].role = INNOCENT_ROLE;
                 number_of_innocent_roles_assigned++;
             }
