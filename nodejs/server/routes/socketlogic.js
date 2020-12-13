@@ -18,8 +18,17 @@ const TRAITOR_ROLE = "TRAITOR";
 
 let roomCollection = [];    // TODO: Save to database for persistence
 
-module.exports = function (io, socket, db) {
+exports.dataGet = function getRoomCollection() {
+    return roomCollection;
+}
 
+exports.dataSet = function setRoomCollection(data) {
+    for(let i = 0; i < data.length; i++){
+        roomCollection.push(data[i]);
+    }
+}
+
+exports.socketapp = function (io, socket, db) {
     // whoAmI - returns user information and statistics
     socket.on('whoAmI', () => {
         data = {
