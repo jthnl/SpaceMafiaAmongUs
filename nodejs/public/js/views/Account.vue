@@ -34,6 +34,14 @@
     </div>
     <div class="grid-item-instructions">
       <h2>Instructions</h2>
+      <p>This game is played with 5 or 6 players who are split into two teams, Innocents and Traitors.</p>
+      <p>The goal of the innocents is to attempt to identify each other in order to be selected on quest teams and succeed in completing three quests.</p>
+      <p>The goal of the traitors is to sabotage three quests by failing them without the innocents catching on.</p>
+      <p>Each round, a team captain is chosen at random. They will nominate players to the quest team.
+        If this quest team is accepted by popular vote, the players go on the quest. If the team is rejected, a new captain is chosen and selects new candidates.</p>
+      <p>When a quest team is selected, the players each choose to succeed or fail the quest. If one or more players decides to fail, the entire quest fails. If everybody chooses to succeed, the quest succeeds.</p>
+      <p>The game ends in a victory for the innocents if three of five quests result in success.</p>
+      <p>The game ends in a victory for the traitors if three of five quests result in failure, or if five consecutive quest team votes fail.</p>
     </div>
   </div>
 </template>
