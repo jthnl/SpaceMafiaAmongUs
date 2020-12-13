@@ -65,7 +65,8 @@ module.exports = function (io, socket, db) {
                 io.to(room.roomCode).emit('playerListUpdate', room.userlist);       // notify subscribers
             } else {
                 // unable to join because game is in progress
-                socket.emit('accountErrorMessage', 'game is in progress');
+                socket.emit('roomCode', room.roomCode);                             // send roomCode to user
+                io.to(room.roomCode).emit('playerListUpdate', room.userlist);       // notify subscribers
             }
         } else {
             // unable to find room
@@ -77,12 +78,28 @@ module.exports = function (io, socket, db) {
     // ***** ROOM PAGE ****************************************************** //
     // ********************************************************************** //
 
+    socket.on('disconnect', () => {
+        console.log('leave Room: ' + socket.request.user._id);
+        for (let i = 0; i < roomCollection.length; i++) {
+            console.log(JSON.stringify(roomCollection[i]));
+            let player = roomCollection[i].playerManager.getPlayer(socket.request.user._id)
+            if (player !== null) {
+                player.gameReady = false;
+                sendPlayerList(roomCollection[i]);
+            }
+        }
+    });
+
     // ***** PLAYERLIST COMPONENT ******************************************* //
 
     // initialize playerlist component when user enters room
     socket.on('playerListInit', (gameCode) => {
         console.log("playerListInit: " + gameCode + ":" + socket.request.user.username);
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
+        if(room.gameManager.gameActive){
+            let player = room.playerManager.getPlayer(socket.request.user._id);
+            player.gameReady = true;
+        }
         socket.join(room.roomCode);
         sendPlayerList(room);
     });
@@ -312,7 +329,7 @@ module.exports = function (io, socket, db) {
             message: "room deleted by admin"
         });
         // kick all users out of the socket IO room
-        io.of('/').in('room name').clients(function(error, clients) {
+        io.of('/').in('room name').clients(function (error, clients) {
             if (clients.length > 0) {
                 console.log('clients in the room: \n');
                 console.log(clients);
@@ -322,7 +339,7 @@ module.exports = function (io, socket, db) {
             }
         });
         //delete room from collection
-        roomCollection = roomCollection.filter( room => room.roomCode !== gameCode);
+        roomCollection = roomCollection.filter(room => room.roomCode !== gameCode);
         // update Admin view
         sendAdminUpdate();
     });
