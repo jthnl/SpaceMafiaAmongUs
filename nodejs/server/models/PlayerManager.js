@@ -10,14 +10,16 @@ module.exports = class PlayerManager {
     }
 
     addPlayer(user) {
-        this.playerList.push(new Player(user._id, user.username, user.name));
+        if (this.getPlayer(user._id) === null) {
+            this.playerList.push(new Player(user._id, user.username, user.name));
+        }
     }
 
     removePlayer(player_id) {
         this.playerList = this.userlist.filter(user => user._id !== player_id);
     }
 
-    getPlayerCount(){
+    getPlayerCount() {
         return this.playerList.length;
     }
 
@@ -31,16 +33,16 @@ module.exports = class PlayerManager {
         return null;
     }
 
-    playersReady(){
+    playersReady() {
         let players = this.playerList;
         // not enough players
-        if(players.length < 5){
+        if (players.length < 5) {
             return false;
         }
         // else, check if everyone else is ready
         let allReady = true;
-        for(let i = 0; i < players.length; i++){
-            if(players[i].gameReady === false){
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].gameReady === false) {
                 allReady = false;
             }
         }
