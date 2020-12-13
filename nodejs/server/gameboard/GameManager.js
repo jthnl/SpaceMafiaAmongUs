@@ -38,7 +38,6 @@ module.exports = class GameManager {
         this.game = new Game(this.playerManager);       // create a new Game Object
         this.state = GAME_STATE_PENDING;                // set initial game state
         this.gameActive = false;                        // game currently ongoing
-        this.failedVotes = 0;                           // counts for 5 successive fails, immediete fail
     }
 
     // progresses to the next game state, depending on game conditions
@@ -70,14 +69,16 @@ module.exports = class GameManager {
                     this.state = GAME_STATE_QUEST;
                 } else {
                     // quest failed - not enough votes
-                    this.failedVotes++;
+                    this.game.failed_votes++;
 
-                    if (this.failedVotes >= 5) {
-                        // 5 consecutive fails, innocents lose
+                    let gameDone = this.game.check_win();
+                    if (gameDone) {
+                        // either team has won
+                        this.gameActive = false;
                         this.printStateDebug(GAME_STATE_TEAMVOTE, GAME_STATE_END);
                         this.state = GAME_STATE_END;
                     } else {
-                        // try to team build again
+                        // game is still ongoing
                         this.printStateDebug(GAME_STATE_TEAMVOTE, GAME_STATE_TEAMBUILD);
                         this.state = GAME_STATE_TEAMBUILD;
                     }
@@ -86,7 +87,7 @@ module.exports = class GameManager {
 
 
             case GAME_STATE_QUEST:
-                this.failedVotes = 0;
+                this.game.failed_votes = 0;
                 this.game.resolve_quest();
                 let gameDone = this.game.check_win();
                 if (gameDone) {
@@ -141,7 +142,7 @@ module.exports = class GameManager {
         let gameHistory = {
             currentQuest: this.game.current_quest,
             questHistory: this.game.quests,
-            votesFailed: this.failedVotes
+            votesFailed: this.game.failed_votes
         }
         return gameHistory;
     }

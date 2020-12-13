@@ -105,6 +105,7 @@ module.exports = class Game {
         // List variables
         // this.playerManager = playerManager;
         this.quests = [];
+        this.failed_votes = 0; // Counts for 5 successive fails, immediate fail
 
         this.create_quests();
     }
@@ -146,7 +147,7 @@ module.exports = class Game {
             }
 
             // If randomly generated number is in range [0, 0.5), assign innocent role
-            if (Math.random() < (this.number_of_innocent_players / (this.number_of_innocent_players+this.number_of_traitor_players))) {
+            if (Math.random() < (this.number_of_innocent_players / (this.number_of_innocent_players + this.number_of_traitor_players))) {
                 this.playerManager.playerList[i].role = INNOCENT_ROLE;
                 number_of_innocent_roles_assigned++;
             }
@@ -261,7 +262,8 @@ module.exports = class Game {
 
     check_win() {
         if (this.traitor_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN ||
-            this.innocent_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN) {
+            this.innocent_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN ||
+            this.failed_votes >= NUMBER_OF_QUESTS) {
             this.game_complete = true;
             console.log("Check win: game complete");
             return true;
@@ -273,7 +275,8 @@ module.exports = class Game {
 
     get_winner() {
         if (this.game_complete) {
-            if (this.traitor_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN) {
+            if (this.traitor_wins >= NUMBER_OF_QUESTS_NEEDED_TO_WIN ||
+                this.failed_votes >= NUMBER_OF_QUESTS) {
                 return TRAITOR_ROLE;
             } else {
                 return INNOCENT_ROLE;
