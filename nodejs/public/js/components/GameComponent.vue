@@ -9,23 +9,46 @@
 
         <div v-if="gameState === 1 && myPlayer.is_captain">
           <h3>Team Building</h3>
+          <p>Select {{ gameHistory.currentQuest.number_of_quest_players }} players as a quest team.</p>
           <div v-for="player in playerList" :key="player._id">
             <p v-if="!player.on_team"><button v-on:click="pick(player._id)">{{player.username}}</button></p>
           </div>
         </div>
+        <div v-if="gameState === 1 && !myPlayer.is_captain">
+          <h3>Team Building</h3>
+          <p>Waiting for captain to choose a quest team. ({{ gameHistory.votesFailed }} players.)</p>
+          <p>Votes Failed: {{ gameHistory.votesFailed }}/5</p>
+        </div>
 
         <div v-if="gameState === 2 && myPlayer.team_voting_enabled">
           <h3>Team Voting</h3>
+          <p>Do you approve of this team?</p>
           <p><button v-on:click="approve()">Approve</button></p>
           <p><button v-on:click="reject()">Reject</button></p>
+        </div>
+        <div v-if="gameState === 2 && !myPlayer.team_voting_enabled">
+          <p>Waiting for all players to vote.</p>
         </div>
 
         <div v-if="gameState === 3 && myPlayer.on_team && myPlayer.quest_voting_enabled">
           <h3>Quest Voting</h3>
+          <p>You're on the quest team! Vote to succeed or fail the quest.</p>
           <p><button v-on:click="success()">Success</button></p>
           <p><button v-on:click="fail()">Fail</button></p>
         </div>
+        <div v-if="gameState === 3 && !myPlayer.on_team">
+          <p>Team approved!</p>
+        </div>
+        <div v-if="gameState === 3 && !myPlayer.quest_voting_enabled">
+          <p>Waiting for quest results...</p>
+        </div>
 
+        <div v-if="gameState === 4">
+          <p> {{ this.gameWinner }} wins!</p>
+        </div>
+        <div v-if="gameState === 4 && !myPlayer.roomCreator">
+          <p>Waiting for room host to start a new game.</p>
+        </div>
         <div v-if="gameState === 4 && myPlayer.roomCreator">
           <p><button v-on:click="newGame()">New Game</button></p>
         </div>
@@ -54,6 +77,7 @@ module.exports = {
         gameState: 0,
         playerList: [],
         gameHistory: [],
+        gameWinner: "",
     };
   },
   created: function () {
@@ -65,7 +89,8 @@ module.exports = {
       this.messageList = data.messageList;
       this.playerList = data.playerList;
       this.gameState = data.gameState;
-      // this.gameHistory = data.gameHistory;   // Not implemented yet
+      this.gameHistory = data.gameHistory;
+      this.gameWinner = data.gameWinner;
     });
   },
   methods: {

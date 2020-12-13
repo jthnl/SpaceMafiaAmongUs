@@ -301,7 +301,7 @@ module.exports = function (io, socket, db) {
             gameState: room.gameManager.state,
             playerList: room.playerManager.playerList,
             gameHistory: room.gameManager.getQuestHistory(),
-            gameWinner: room.gameManager.getWinner()
+            gameWinner: room.gameManager.getWinner(),
         });
     }
 

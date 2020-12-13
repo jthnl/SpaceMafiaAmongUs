@@ -86,6 +86,7 @@ module.exports = class GameManager {
 
 
             case GAME_STATE_QUEST:
+                this.failedVotes = 0;
                 this.game.resolve_quest();
                 let gameDone = this.game.check_win();
                 if (gameDone) {
@@ -139,7 +140,8 @@ module.exports = class GameManager {
     getQuestHistory(){
         let gameHistory = {
             currentQuest: this.game.current_quest,
-            questHistory: this.game.quests
+            questHistory: this.game.quests,
+            votesFailed: this.failedVotes
         }
         return gameHistory;
     }
