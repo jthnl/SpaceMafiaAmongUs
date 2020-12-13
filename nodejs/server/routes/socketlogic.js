@@ -204,7 +204,7 @@ exports.socketapp = function (io, socket, db) {
         }
     });
 
-    // players approves the quest, STATE = GAME_STATE_TEAMVOTE
+    // players approves the proposed quest team, STATE = GAME_STATE_TEAMVOTE
     socket.on('approve', (gameCode) => {
         console.log("approve");
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
@@ -219,7 +219,7 @@ exports.socketapp = function (io, socket, db) {
         }
     });
 
-    // players rejects the quest, STATE = GAME_STATE_TEAMVOTE
+    // players rejects the proposed quest team, STATE = GAME_STATE_TEAMVOTE
     socket.on('reject', (gameCode) => {
         console.log("reject");
         let room = roomCollection.find(({ roomCode }) => roomCode === gameCode);
@@ -228,6 +228,9 @@ exports.socketapp = function (io, socket, db) {
             let allVoted = room.gameManager.voteForTeam(player, false);
             if (allVoted) {
                 room.gameManager.nextGameState();
+                if (room.gameManager.getState() === GAME_STATE_END) {
+                    endGame(room);
+                }
             }
             sendPlayerList(room);
             sendGameUpdate(room);
