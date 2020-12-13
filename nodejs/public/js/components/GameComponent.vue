@@ -22,6 +22,13 @@
 
         <div v-if="gameState === 2 && myPlayer.team_voting_enabled">
           <h3>Team Voting (Quest #{{ gameHistory.currentQuest.quest_round+1 }})</h3>
+          <p>The selected team is:</p>
+          <div v-for="player in playerList" :key="player.id">
+            <div v-if="player.on_team">
+              <span class=teamMember>&#128160;</span>
+              <span> {{ player.name }}</span>
+            </div>
+          </div>
           <p>Do you approve of this team?</p>
           <p><button v-on:click="approve()">Approve</button></p>
           <p><button v-on:click="reject()">Reject</button></p>
@@ -144,5 +151,9 @@ module.exports = {
   left: 10px;
   right: 10px;
   bottom: 10px;
+}
+
+.teamMember {
+  font-size: 70%;
 }
 </style>
