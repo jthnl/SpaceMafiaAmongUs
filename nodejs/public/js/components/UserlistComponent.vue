@@ -3,11 +3,12 @@
     <h2>Users</h2>
     <ul id="users">
       <li v-for="player in playerList" :key="player._id">
-        <div v-if="!player.gameReady">
-           {{ player.name }} <span>&#10006;</span>
-        </div>
-        <div v-if="player.gameReady">
-           {{ player.name }} <span>&#10004;</span>
+        <div>
+           <span v-if="player.is_captain && gameState === 1">&#128081;</span>
+           {{ player.name }}
+           <span v-if="player._id === myPlayer._id">(You)</span>
+           <span v-if="!player.gameReady">&#10006;</span>
+           <span v-if="player.gameReady">&#10004;</span>
         </div>
       </li>
     </ul>

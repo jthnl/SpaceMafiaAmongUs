@@ -5,19 +5,29 @@
         <!-- Temporary - should change to selectable user list -->
         <!-- <input id="message" autocomplete="off" placeholder="username" v-model="pickChoice"/>
         <p><button v-on:click="pick()">pick</button></p> -->
-        
-        <div v-for="player in otherPlayers" :key="player._id">
-          <p><button v-on:click="pick(player._id)">{{player.username}}</button></p>
+
+        <div v-for="player in playerList" :key="player._id">
+          <div v-if="gameState === 1 && myPlayer.is_captain">
+            <p><button v-on:click="pick(player._id)">{{player.username}}</button></p>
+          </div>
         </div>
 
-        
-        <p><button v-on:click="approve()">Approve</button></p>
-        <p><button v-on:click="reject()">Reject</button></p>
-        <p><button v-on:click="success()">Success</button></p>
-        <p><button v-on:click="fail()">Fail</button></p>
-        <p><button v-on:click="newGame()">New Game</button></p>
+        <div v-if="gameState === 2">
+          <p><button v-on:click="approve()">approve</button></p>
+          <p><button v-on:click="reject()">reject</button></p>
+        </div>
+
+        <div v-if="gameState === 3 && myPlayer.on_team">
+          <p><button v-on:click="success()">success</button></p>
+          <p><button v-on:click="fail()">fail</button></p>
+        </div>
+
+        <div v-if="gameState === 4">
+          <p><button v-on:click="newGame()">new game</button></p>
+        </div>
+
     </div>
-    
+
 </template>
 
 <script>
@@ -47,6 +57,7 @@ module.exports = {
     this.sockets.subscribe("gameUpdate", (data) => {
       this.messageList = data.messageList;
       this.playerList = data.playerList;
+      this.gameState = data.gameState;
       // this.gameHistory = data.gameHistory;   // Not implemented yet
     });
   },
@@ -77,11 +88,11 @@ module.exports = {
     }
   },
   computed: {
-    otherPlayers() {
-      return this.playerList.filter(
-        player => {return player._id != this.me._id}
-      );
-    },
+    myPlayer: function () {
+      let foundPlayer = this.playerList.find(player => player._id === this.me._id);
+      console.log(JSON.stringify(foundPlayer));
+      return foundPlayer;
+    }
   }
 };
 </script>
