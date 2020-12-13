@@ -1,5 +1,5 @@
 <template>
-  <div class="grid-item-messages-component grid-container-messages-component">
+  <div class="grid-item-chat-component grid-container-chat-component">
     <div id="msglist-container" class="grid-item-messages">
       <ul id="messages">
         <div v-for="message in messageList" :key="message._mid">

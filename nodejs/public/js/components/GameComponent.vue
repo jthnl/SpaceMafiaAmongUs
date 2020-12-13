@@ -1,23 +1,27 @@
 <template>
-    <div class="grid-item-info">
+    <div class="grid-item-game-component grid-container-game-component">
+      <div class="grid-item-game">
         <h2>Game</h2>
 
         <!-- Temporary - should change to selectable user list -->
         <!-- <input id="message" autocomplete="off" placeholder="username" v-model="pickChoice"/>
         <p><button v-on:click="pick()">pick</button></p> -->
 
-        <div v-for="player in playerList" :key="player._id">
-          <div v-if="gameState === 1 && myPlayer.is_captain">
+        <div v-if="gameState === 1 && myPlayer.is_captain">
+          <h3>Team Building</h3>
+          <div v-for="player in playerList" :key="player._id">
             <p v-if="!player.on_team"><button v-on:click="pick(player._id)">{{player.username}}</button></p>
           </div>
         </div>
 
         <div v-if="gameState === 2 && myPlayer.team_voting_enabled">
+          <h3>Team Voting</h3>
           <p><button v-on:click="approve()">Approve</button></p>
           <p><button v-on:click="reject()">Reject</button></p>
         </div>
 
         <div v-if="gameState === 3 && myPlayer.on_team && myPlayer.quest_voting_enabled">
+          <h3>Quest Voting</h3>
           <p><button v-on:click="success()">Success</button></p>
           <p><button v-on:click="fail()">Fail</button></p>
         </div>
@@ -25,7 +29,10 @@
         <div v-if="gameState === 4 && myPlayer.roomCreator">
           <p><button v-on:click="newGame()">New Game</button></p>
         </div>
-
+      </div>
+      <div class="grid-item-rounds">
+        <h2>Rounds</h2>
+      </div>
     </div>
 
 </template>
