@@ -44,7 +44,7 @@ module.exports = {
       };
 
       axios
-        .post("http://localhost:3000/register", loginInfo, {
+        .post("/register", loginInfo, {
           headers: { withCredentials: true },
         })
         .then((res) => {

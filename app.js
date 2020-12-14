@@ -14,7 +14,7 @@ const io = require('socket.io')(http);
 const passport = require('passport');
 const MongoClient = require('mongodb').MongoClient;
 
-const port = process.env.PORT_NODE;
+const port = process.env.PORT || process.env.PORT_NODE;
 
 // local modules
 const db = require('./server/database/mongoconn');                  // connection to mongo

@@ -48,5 +48,8 @@
       "vue-socket.io/dist/vue-socketio.js",
       "socket.io-client/dist/socket.io.js"
     ]
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

@@ -10,18 +10,11 @@ Space Mafia Among Us is a web-based game where two teams, innocents and traitors
 ``` 
 git clone https://github.com/jthnl/SpaceMafiaAmongUs 
 ```
-
-1. install mongo db locally: 
+2. install mongo db locally:
 
 ```
 https://docs.mongodb.com/manual/administration/install-community/
 ```
-
-1. navigate to nodejs folder
-
-```
-$ cd ./SpaceMafiaAmongUs/nodejs
-``` 
 3. install NodeJS dependencies
 ```
 $ npm install
