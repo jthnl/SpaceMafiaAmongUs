@@ -46,10 +46,10 @@ http://localhost:3000
 2. Improve user authentication security: proper salt + hash + encryption; 3rd party authentication.
 3. Improve graphics and animation.
 
-## Gameplay
+<!-- ## Gameplay
 ![Login](photos/Login.png)
 
 
 ![Account](photos/Account.png)
 
-![Gameplay](photos/gameplay.png)
+![Gameplay](photos/gameplay.png) -->
