@@ -47,10 +47,9 @@ http://localhost:3000
 3. Improve graphics and animation.
 
 ## Gameplay
-![Gameplay](/photos/Login.png)
+![Login](photos/Login.png)
 
 
-![Gameplay](/photos/Account.png)
+![Account](photos/Account.png)
 
-
-![Gameplay](/photos/gameplay.png)
+![Gameplay](photos/gameplay.png)
