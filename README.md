@@ -45,3 +45,12 @@ http://localhost:3000
 1. Add more in-depth user roles: Merlin, Assasin, other special roles.
 2. Improve user authentication security: proper salt + hash + encryption; 3rd party authentication.
 3. Improve graphics and animation.
+
+## Gameplay
+![Gameplay](/photos/Login.png)
+
+
+![Gameplay](/photos/Account.png)
+
+
+![Gameplay](/photos/gameplay.png)
